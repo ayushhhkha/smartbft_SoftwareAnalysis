@@ -7,7 +7,7 @@ This project is conducted through WSL and Visual Studio Code.
 ### Requirements
 
 #### Java
-Ensure that Java is downloaded:
+Ensure that Java is installed. If it is not installed follow the following instructions:
 
 `sudo apt update`
 
@@ -19,7 +19,7 @@ Then check the version using:
 
 #### TLA+ Extension
 
-In order to run .tla files we will need to download an extension in the Visual Studio Codes Extension page through which the following extension should be installed:
+In order to run .tla files we will need to install an extension in the Visual Studio Codes Extension page through which the following extension should be installed:
 
 `TLA + (Temporal Logic of Actions)`
 
