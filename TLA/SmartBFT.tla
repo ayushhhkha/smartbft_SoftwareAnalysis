@@ -14,4 +14,10 @@ Init ==
     /\ commitMsgs = {}
     /\ decided = {}
 
+Next ==
+    /\ UNCHANGED <<proposalMsgs,
+                   prepareMsgs,
+                   commitMsgs,
+                   decided>>
+
 =============================================================
