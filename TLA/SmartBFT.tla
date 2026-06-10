@@ -1,14 +1,20 @@
 ---------------------- MODULE SmartBFT ----------------------
-EXTENDS Naturals, Sequences
+
+EXTENDS Naturals, Sequences, FiniteSets
 
 CONSTANT Replicas
 
-VARIABLES proposalMsgs,
+VARIABLES leader,
+          proposalMsgs,
           prepareMsgs,
           commitMsgs,
           decided
 
+Quorum ==
+    3
+    
 Init ==
+    /\ leader = 1
     /\ proposalMsgs = {}
     /\ prepareMsgs = {}
     /\ commitMsgs = {}
@@ -16,37 +22,48 @@ Init ==
 
 SendProposal ==
     /\ proposalMsgs = {}
-    /\ proposalMsgs' = {"proposal"}
-    /\ UNCHANGED <<prepareMsgs,
+    /\ proposalMsgs' =
+        {[type |-> "PROPOSAL",
+          sender |-> leader]}
+    /\ UNCHANGED <<leader,
+                   prepareMsgs,
                    commitMsgs,
                    decided>>
 
 SendPrepare ==
     /\ proposalMsgs # {}
-    /\ prepareMsgs = {}
-    /\ prepareMsgs' = {"prepare"}
-    /\ UNCHANGED <<proposalMsgs,
+    /\ Cardinality(prepareMsgs) < Quorum
+    /\ prepareMsgs' =
+        prepareMsgs \cup
+        {[sender |-> Cardinality(prepareMsgs) + 1]}
+    /\ UNCHANGED <<leader,
+                   proposalMsgs,
                    commitMsgs,
                    decided>>
 
 SendCommit ==
-    /\ prepareMsgs # {}
-    /\ commitMsgs = {}
-    /\ commitMsgs' = {"commit"}
-    /\ UNCHANGED <<proposalMsgs,
+    /\ Cardinality(prepareMsgs) >= Quorum
+    /\ Cardinality(commitMsgs) < Quorum
+    /\ commitMsgs' =
+        commitMsgs \cup
+        {[sender |-> Cardinality(commitMsgs) + 1]}
+    /\ UNCHANGED <<leader,
+                   proposalMsgs,
                    prepareMsgs,
                    decided>>
 
 Decide ==
-    /\ commitMsgs # {}
+    /\ Cardinality(commitMsgs) >= Quorum
     /\ decided = {}
     /\ decided' = {"value"}
-    /\ UNCHANGED <<proposalMsgs,
+    /\ UNCHANGED <<leader,
+                   proposalMsgs,
                    prepareMsgs,
                    commitMsgs>>
 
 Stutter ==
-    UNCHANGED <<proposalMsgs,
+    UNCHANGED <<leader,
+               proposalMsgs,
                prepareMsgs,
                commitMsgs,
                decided>>
@@ -58,14 +75,17 @@ Next ==
     \/ Decide
     \/ Stutter
 
-
 Agreement ==
-    decided = {} \/ decided = {"value"}
+    Cardinality(decided) <= 1
 
 Validity ==
     decided # {} => proposalMsgs # {}
 
 Integrity ==
-    decided # {} => commitMsgs # {}
+    decided # {} => Cardinality(commitMsgs) >= Quorum
+
+CommitImpliesPrepare ==
+    Cardinality(commitMsgs) > 0 =>
+    Cardinality(prepareMsgs) >= Quorum
 
 =============================================================
