@@ -1,4 +1,4 @@
-# Research on Software Analysis: SmartBFT
+# Research in Software Analysis: SmartBFT
 
 ## Setup
 
