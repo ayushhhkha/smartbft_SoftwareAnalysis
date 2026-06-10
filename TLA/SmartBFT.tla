@@ -2,7 +2,9 @@
 
 EXTENDS Naturals, Sequences, FiniteSets
 
-CONSTANT Replicas
+CONSTANTS Replicas, F
+
+ASSUME 3 * F < Cardinality(Replicas)
 
 VARIABLES leader,
           proposalMsgs,
@@ -10,9 +12,8 @@ VARIABLES leader,
           commitMsgs,
           decided
 
-Quorum ==
-    3
-    
+Quorum == 2* F + 1
+
 Init ==
     /\ leader = 1
     /\ proposalMsgs = {}
