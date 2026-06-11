@@ -1,3 +1,10 @@
 {
-    "tlaplus.tlc.modelChecker.options": "-workers 1 -coverage 1"
+  "tlaplus.tlc.modelChecker.options": "-workers auto -coverage 1"
 }
+
+// Meaning:
+//   - -workers auto:
+//       TLC uses an automatic number of worker threads to explore the state space.
+
+//   - -coverage 1:
+//       TLC records and reports model coverage statistics every 1 minute.
