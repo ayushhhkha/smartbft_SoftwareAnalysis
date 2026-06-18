@@ -7,11 +7,13 @@
 3. [Setup](#setup)
 4. [Running the Model](#running-the-model)
 5. [Available Configurations](#available-configurations)
-6. [Generated Files](#generated-files)
-7. [Terminal Output](#terminal-output)
-8. [Understanding the Results](#understanding-the-results)
-9. [Reading TLC Coverage](#reading-tlc-coverage)
-10. [Advanced TLC / CLI Notes](#advanced-tlc--cli-notes)
+6. [Changing Configurations](#changing-configurations)
+7. [Generated Files](#generated-files)
+8. [Terminal Output](#terminal-output)
+9. [Understanding the Results](#understanding-the-results)
+10. [HTML Reports](#html-reports)
+11. [Reading TLC Coverage](#reading-tlc-coverage)
+12. [Advanced TLC / CLI Notes](#advanced-tlc--cli-notes)
 
 ---
 
@@ -19,18 +21,30 @@
 
 This project models a simplified version of the SmartBFT/BFT-SMaRt normal consensus phase in TLA+.
 
-The model focuses on one consensus instance:
+The final model represents **multiple consensus instances**, not only one isolated consensus round. Each consensus instance follows the normal-phase structure:
 
 ```text
-PROPOSE -> WRITE -> ACCEPT -> DECIDE
+PROPOSE -> WRITE -> ACCEPT -> DECIDE -> DELIVER
 ```
 
-This means the model checks how replicas agree on one proposed value/batch, rather than modeling the full repeated log of many batches.
-
-The main safety goal is:
+The model therefore checks a simplified state machine replication flow:
 
 ```text
-No two correct replicas should decide different values.
+Consensus 1
+    -> deliver decided value/batch
+Consensus 2
+    -> deliver decided value/batch
+...
+```
+
+This is closer to the way BFT-SMaRt repeatedly orders batches of client requests. The model still abstracts away many implementation details, but it now includes the idea that consensus instances are executed and delivered in order.
+
+The main safety goals are:
+
+```text
+No two correct replicas decide different values for the same consensus instance.
+Correct replicas only deliver consensus instances in order.
+Correct replicas only accept/decide values after the required quorum conditions.
 ```
 
 ---
@@ -41,6 +55,13 @@ No two correct replicas should decide different values.
 .
 ├── SmartBFT.tla                 # Main TLA+ model
 ├── configs/                     # TLC configuration files
+│   ├── debug-2replicas-f0.cfg
+│   ├── bft-f1-no-faults.cfg
+│   ├── bft-f1-faulty-leader.cfg
+│   ├── bft-f1-faulty-nonleader.cfg
+│   ├── bft-f2-faulty-leader.cfg
+│   ├── bft-f2-faulty-nonleaders.cfg
+│   └── bft-f2-extra-replicas-faulty-nonleaders.cfg
 ├── scripts/
 │   └── parse_tlc_out.py         # Parses TLC output and generates HTML reports
 ├── outputs/                     # Generated .out files from TLC
@@ -51,16 +72,14 @@ No two correct replicas should decide different values.
 └── README.md
 ```
 
-The two most important TLA+ files are:
+The two most important inputs are:
 
 ```text
 SmartBFT.tla
 configs/*.cfg
 ```
 
-`SmartBFT.tla` contains the actual model.
-
-The `.cfg` files define concrete model-checking scenarios, such as the number of replicas, faulty replicas, leader, values, and invariants.
+`SmartBFT.tla` contains the actual model. The `.cfg` files define concrete TLC scenarios, such as the number of replicas, faulty replicas, leader, values, number of consensus instances, and invariants.
 
 ---
 
@@ -95,8 +114,6 @@ tla2tools.jar
 
 Graphviz is required if you want to generate state graph images.
 
-Install it with:
-
 ```bash
 sudo apt update
 sudo apt install graphviz
@@ -113,8 +130,10 @@ dot -V
 To run `.tla` files in Visual Studio Code, install:
 
 ```text
-TLA + (Temporal Logic of Actions)
+TLA+ (Temporal Logic of Actions)
 ```
+
+The Makefile workflow is recommended because it supports multiple named configurations and automatically writes outputs, graphs, and reports.
 
 ---
 
@@ -122,41 +141,79 @@ TLA + (Temporal Logic of Actions)
 
 The recommended way to run the project is through the Makefile.
 
+You no longer need to manually pass a `.cfg` file for the normal runs. Instead, the Makefile contains predefined targets for each configuration.
+
 ### Show Available Make Commands
 
 ```bash
 make help
 ```
 
-This prints the available commands and examples.
+This prints all predefined commands.
 
 ---
 
-### Run TLC on a Config
+### Run TLC on a Specific Configuration
+
+Use one of the predefined commands:
 
 ```bash
-make check CFG=configs/SmartBFT_faulty_1_nonleader.cfg
+make check-tiny
+make check-no-faults
+make check-f1-leader
+make check-f1-nonleader
+make check-f2-leader
+make check-f2-nonleaders
+make check-f2-extra
+```
+
+Example:
+
+```bash
+make check-f2-nonleaders
 ```
 
 This command:
 
 1. Runs TLC on `SmartBFT.tla`.
-2. Uses the selected `.cfg` file.
+2. Uses the predefined config `configs/bft-f2-faulty-nonleaders.cfg`.
 3. Writes the TLC output to `outputs/`.
 4. Generates an HTML report in `reports/`.
-5. Prints both the normal TLC output and a small custom summary table in the terminal.
-
-Example:
-
-```bash
-make check CFG=configs/SmartBFT_faulty_1_leader.cfg
-```
+5. Prints both the normal TLC output and a custom summary table in the terminal.
 
 Generated files:
 
 ```text
-outputs/SmartBFT_faulty_1_nonleader.out
-reports/SmartBFT_faulty_1_nonleader.html
+outputs/bft-f2-faulty-nonleaders.out
+reports/bft-f2-faulty-nonleaders.html
+```
+
+---
+
+### Run All Configurations
+
+```bash
+make all-configs
+```
+
+This runs all predefined check targets.
+
+Use this when you want to regenerate all verification results for the report.
+
+---
+
+### Generate a State Graph
+
+For graph generation, use the tiny/debug config. Larger configs can produce extremely large and unreadable graphs.
+
+```bash
+make graph-tiny
+```
+
+This generates the DOT graph:
+
+```text
+graphs/debug-2replicas-f0.dot
 ```
 
 ---
@@ -164,44 +221,62 @@ reports/SmartBFT_faulty_1_nonleader.html
 ### Generate an SVG State Graph
 
 ```bash
-make svg CFG=configs/SmartBFT_tiny.cfg
+make svg-tiny
 ```
-
-This command first generates the DOT graph, then converts it to SVG.
 
 Generated files:
 
 ```text
-outputs/SmartBFT_tiny.out
-graphs/SmartBFT_tiny.dot
-graphs/SmartBFT_tiny.svg
-reports/SmartBFT_tiny.html
+outputs/debug-2replicas-f0.out
+graphs/debug-2replicas-f0.dot
+graphs/debug-2replicas-f0.svg
+reports/debug-2replicas-f0.html
 ```
 
-SVG is recommended for state graphs because it stays clear when zooming.
+SVG is recommended because it stays readable when zooming.
 
 ---
 
 ### Generate a PNG State Graph
 
 ```bash
-make png CFG=configs/SmartBFT_tiny.cfg
+make png-tiny
 ```
-
-This command first generates the DOT graph, then converts it to PNG.
 
 Generated files:
 
 ```text
-outputs/SmartBFT_tiny.out
-graphs/SmartBFT_tiny.dot
-graphs/SmartBFT_tiny.png
-reports/SmartBFT_tiny.html
+outputs/debug-2replicas-f0.out
+graphs/debug-2replicas-f0.dot
+graphs/debug-2replicas-f0.png
+reports/debug-2replicas-f0.html
 ```
 
-The generated HTML report will include the PNG image.
+The generated HTML report will include the graph image.
 
-Use the tiny config for graph generation. Larger configs may produce very large state graphs.
+---
+
+### Use Custom TLC Options
+
+The Makefile uses:
+
+```text
+-workers auto
+```
+
+by default.
+
+To change TLC options for one run:
+
+```bash
+make check-tiny TLC_BASE_OPTS="-workers 1 -coverage 1"
+```
+
+For report measurements, using one worker can make results easier to compare:
+
+```bash
+make check-f2-nonleaders TLC_BASE_OPTS="-workers 1 -coverage 1"
+```
 
 ---
 
@@ -211,7 +286,7 @@ Use the tiny config for graph generation. Larger configs may produce very large 
 make clean
 ```
 
-This removes generated files and folders:
+This removes:
 
 ```text
 outputs/
@@ -240,10 +315,11 @@ INIT Init
 NEXT Next
 
 CONSTANTS
-    Replicas = {1,2,3,4}
+    Replicas = {1,2,3,4,5,6,7}
     Values = {v1, v2}
-    F = 1
-    Faulty = {4}
+    MaxConsensus = 2
+    F = 2
+    Faulty = {4,5}
     Leader = 1
     NoValue = NoValue
 
@@ -253,9 +329,30 @@ INVARIANTS
     Validity
     Integrity
     AcceptImpliesWrite
+    OrderedDelivery
 ```
 
-### `SmartBFT_tiny.cfg`
+### Important Config Fields
+
+| Field | Meaning |
+| ----- | ------- |
+| `Replicas` | Replica identifiers included in the model. |
+| `Values` | Abstract values/batches that may be proposed. |
+| `MaxConsensus` | Number of consensus instances modeled. |
+| `F` | Number of Byzantine faults tolerated. |
+| `Faulty` | Replicas allowed to behave Byzantine. |
+| `Leader` | Replica acting as leader. |
+| `NoValue` | Symbolic value used before a replica decides. |
+
+---
+
+### `debug-2replicas-f0.cfg`
+
+Make target:
+
+```bash
+make check-tiny
+```
 
 Purpose:
 
@@ -268,40 +365,42 @@ Typical setup:
 ```text
 Replicas = {1,2}
 Values = {v1}
+MaxConsensus = 2
 F = 0
 Faulty = {}
 Leader = 1
 ```
 
-Use this config when you want to:
+Use this config to:
 
-* understand what states look like,
-* generate small state graphs,
+* inspect individual TLC states,
+* generate readable state graphs,
 * debug model behavior,
-* inspect transitions visually.
+* understand multi-consensus delivery.
 
 This is not a realistic BFT fault-tolerant setup. It is mainly for learning and visualization.
 
-Run with:
+Graph commands:
 
 ```bash
-make check CFG=configs/SmartBFT_tiny.cfg
-```
-
-Generate graph with:
-
-```bash
-make png CFG=configs/SmartBFT_tiny.cfg
+make svg-tiny
+make png-tiny
 ```
 
 ---
 
-### `SmartBFT_faulty_1_nonleader.cfg`
+### `bft-f1-no-faults.cfg`
+
+Make target:
+
+```bash
+make check-no-faults
+```
 
 Purpose:
 
 ```text
-Main BFT-style configuration with a correct leader and one faulty non-leader.
+Baseline BFT-sized configuration with no faulty replicas.
 ```
 
 Typical setup:
@@ -309,6 +408,83 @@ Typical setup:
 ```text
 Replicas = {1,2,3,4}
 Values = {v1, v2}
+MaxConsensus = 2
+F = 1
+Faulty = {}
+Leader = 1
+```
+
+This checks normal fault-free behavior using a four-replica setup.
+
+Expected behavior:
+
+```text
+FaultyWrite should not be explored.
+FaultyAccept should not be explored.
+FaultyLeaderPropose should not be explored.
+No invariant violations should be found.
+```
+
+---
+
+### `bft-f1-faulty-leader.cfg`
+
+Make target:
+
+```bash
+make check-f1-leader
+```
+
+Purpose:
+
+```text
+BFT configuration where the leader itself is Byzantine.
+```
+
+Typical setup:
+
+```text
+Replicas = {1,2,3,4}
+Values = {v1, v2}
+MaxConsensus = 2
+F = 1
+Faulty = {1}
+Leader = 1
+```
+
+This tests whether the model remains safe when the leader can propose conflicting values.
+
+Expected behavior:
+
+```text
+FaultyLeaderPropose should be explored.
+CorrectLeaderPropose should not be explored.
+No agreement violation should occur.
+Ordered delivery should still hold.
+```
+
+---
+
+### `bft-f1-faulty-nonleader.cfg`
+
+Make target:
+
+```bash
+make check-f1-nonleader
+```
+
+Purpose:
+
+```text
+BFT configuration with a correct leader and one faulty non-leader.
+```
+
+Typical setup:
+
+```text
+Replicas = {1,2,3,4}
+Values = {v1, v2}
+MaxConsensus = 2
 F = 1
 Faulty = {4}
 Leader = 1
@@ -324,90 +500,135 @@ FaultyLeaderPropose should not be explored.
 No invariant violations should be found.
 ```
 
-Run with:
-
-```bash
-make check CFG=configs/SmartBFT_faulty_1_nonleader.cfg
-```
-
 ---
 
-### `SmartBFT_faulty_1_leader.cfg`
+### `bft-f2-faulty-leader.cfg`
+
+Make target:
+
+```bash
+make check-f2-leader
+```
 
 Purpose:
 
 ```text
-Configuration where the leader itself is Byzantine.
+Seven-replica BFT configuration with two faulty replicas, including the leader.
 ```
 
 Typical setup:
 
 ```text
-Replicas = {1,2,3,4}
+Replicas = {1,2,3,4,5,6,7}
 Values = {v1, v2}
-F = 1
-Faulty = {1}
+MaxConsensus = 2
+F = 2
+Faulty = {1,2}
 Leader = 1
 ```
 
-This tests whether the model remains safe even when the leader can propose conflicting values.
+This checks a larger BFT setup where the leader is Byzantine.
 
-Expected behavior:
+Since `n = 7` and `F = 2`, this matches:
 
 ```text
-FaultyLeaderPropose should be explored.
-CorrectLeaderPropose should not be explored.
-No agreement violation should occur.
-```
-
-Run with:
-
-```bash
-make check CFG=configs/SmartBFT_faulty_1_leader.cfg
+n >= 3F + 1
+7 >= 3(2) + 1
 ```
 
 ---
 
-### `SmartBFT_no_faults.cfg`
+### `bft-f2-faulty-nonleaders.cfg`
+
+Make target:
+
+```bash
+make check-f2-nonleaders
+```
 
 Purpose:
 
 ```text
-Baseline configuration with no faulty replicas.
+Seven-replica BFT configuration with a correct leader and two faulty non-leaders.
 ```
 
 Typical setup:
 
 ```text
-Replicas = {1,2,3,4}
+Replicas = {1,2,3,4,5,6,7}
 Values = {v1, v2}
-F = 1
-Faulty = {}
+MaxConsensus = 2
+F = 2
+Faulty = {4,5}
 Leader = 1
 ```
 
-This checks the normal fault-free behavior of the model.
+This is one of the main larger verification configurations.
 
 Expected behavior:
 
 ```text
-FaultyWrite should not be explored.
-FaultyAccept should not be explored.
-FaultyLeaderPropose should not be explored.
-No invariant violations should be found.
-```
-
-Run with:
-
-```bash
-make check CFG=configs/SmartBFT_no_faults.cfg
+Faulty non-leader behavior should be explored.
+The leader remains correct.
+Agreement, quorum-related invariants, and ordered delivery should hold.
 ```
 
 ---
 
-## Modifying Configurations
+### `bft-f2-extra-replicas-faulty-nonleaders.cfg`
 
-You can edit or create new `.cfg` files in the `configs/` folder.
+Make target:
+
+```bash
+make check-f2-extra
+```
+
+Purpose:
+
+```text
+Larger-than-minimum BFT configuration with extra replicas and two faulty non-leaders.
+```
+
+This config keeps `F = 2` but uses more replicas than the minimum `3F + 1`.
+
+It is useful for checking whether the model behaves correctly when the system has extra replicas beyond the minimum fault-tolerant setup.
+
+---
+
+## Changing Configurations
+
+You can still edit or create new `.cfg` files in the `configs/` folder.
+
+### Change the Number of Consensus Instances
+
+The final model supports multiple consensus instances through:
+
+```cfg
+MaxConsensus = 2
+```
+
+This means TLC checks two consensus instances:
+
+```text
+Consensus 1
+Consensus 2
+```
+
+To check only one instance:
+
+```cfg
+MaxConsensus = 1
+```
+
+To check three instances:
+
+```cfg
+MaxConsensus = 3
+```
+
+Increasing `MaxConsensus` makes the model more realistic, but it also increases the state space significantly.
+
+---
 
 ### Change the Faulty Replica
 
@@ -424,6 +645,16 @@ Faulty = {1}
 Leader = 1
 ```
 
+To model two faulty non-leaders:
+
+```cfg
+Faulty = {4,5}
+Leader = 1
+F = 2
+```
+
+---
+
 ### Change the Possible Values
 
 The model treats values as abstract possible batches.
@@ -432,7 +663,7 @@ The model treats values as abstract possible batches.
 Values = {v1, v2}
 ```
 
-This means the leader may propose either `v1` or `v2` for the single consensus instance.
+This means each consensus instance may decide one of these abstract values.
 
 To increase the number of possible batches:
 
@@ -441,6 +672,8 @@ Values = {v1, v2, v3}
 ```
 
 This increases the state space.
+
+---
 
 ### Change the Number of Replicas
 
@@ -475,38 +708,38 @@ The Makefile generates files based on the chosen config name.
 For example:
 
 ```bash
-make check CFG=configs/SmartBFT_faulty_1_nonleader.cfg
+make check-f1-nonleader
 ```
 
 generates:
 
 ```text
-outputs/SmartBFT_faulty_1_nonleader.out
-reports/SmartBFT_faulty_1_nonleader.html
+outputs/bft-f1-faulty-nonleader.out
+reports/bft-f1-faulty-nonleader.html
 ```
 
 Running:
 
 ```bash
-make png CFG=configs/SmartBFT_tiny.cfg
+make png-tiny
 ```
 
 generates:
 
 ```text
-outputs/SmartBFT_tiny.out
-graphs/SmartBFT_tiny.dot
-graphs/SmartBFT_tiny.png
-reports/SmartBFT_tiny.html
+outputs/debug-2replicas-f0.out
+graphs/debug-2replicas-f0.dot
+graphs/debug-2replicas-f0.png
+reports/debug-2replicas-f0.html
 ```
 
 ### Output Folder Summary
 
-| Folder       | Purpose                              |
-| ------------ | ------------------------------------ |
-| `outputs/`   | Raw TLC `.out` files                 |
-| `graphs/`    | DOT/SVG/PNG state graphs             |
-| `reports/`   | HTML reports generated by the parser |
+| Folder | Purpose |
+| ------ | ------- |
+| `outputs/` | Raw TLC `.out` files |
+| `graphs/` | DOT/SVG/PNG state graphs |
+| `reports/` | HTML reports generated by the parser |
 | `.tlc-meta/` | TLC metadata/state exploration files |
 
 ---
@@ -516,7 +749,7 @@ reports/SmartBFT_tiny.html
 When running a Makefile target such as:
 
 ```bash
-make check CFG=configs/SmartBFT_faulty_1_nonleader.cfg
+make check-f1-nonleader
 ```
 
 the terminal prints two kinds of output.
@@ -532,8 +765,6 @@ Computing initial states...
 Finished computing initial states...
 Model checking completed. No error has been found.
 ```
-
-This is essentially the same content that is written to the `.out` file in `outputs/`.
 
 The most important line is:
 
@@ -552,8 +783,8 @@ Example:
 ```text
 TLC Summary
 ============================================================
-Input:  outputs/SmartBFT_faulty_1_nonleader.out
-Report: reports/SmartBFT_faulty_1_nonleader.html
+Input:  outputs/bft-f1-faulty-nonleader.out
+Report: reports/bft-f1-faulty-nonleader.html
 
 State Summary
 ------------------------------------------------------------
@@ -572,11 +803,13 @@ FaultyWrite                                51       1644
 CorrectAccept                             140       1800
 FaultyAccept                              624       1812
 Decide                                   1400       2400
+Deliver                                   900       1200
+AdvanceConsensus                            2          2
 Stutter                                     0       2232
 ============================================================
 ```
 
-The summary table is meant to make the run easier to understand without opening the full HTML report every time.
+The exact numbers depend on the selected config.
 
 ---
 
@@ -598,11 +831,11 @@ then TLC explored the finite state space for that config and found no violation 
 
 ### Important State Summary Numbers
 
-| Metric            | Meaning                                          |
-| ----------------- | ------------------------------------------------ |
-| `total_states`    | Total states TLC generated, including duplicates |
-| `distinct_states` | Unique reachable states                          |
-| `queue_size`      | States still waiting to be explored              |
+| Metric | Meaning |
+| ------ | ------- |
+| `total_states` | Total states TLC generated, including duplicates |
+| `distinct_states` | Unique reachable states |
+| `queue_size` | States still waiting to be explored |
 
 If:
 
@@ -614,11 +847,11 @@ then TLC finished exploring the full reachable state space for that configuratio
 
 ### Important Coverage Numbers
 
-| Column     | Meaning                                                        |
-| ---------- | -------------------------------------------------------------- |
-| `Location` | TLA+ action or expression being measured                       |
-| `Distinct` | Number of new distinct states produced                         |
-| `Total`    | Number of times TLC evaluated/generated states for that action |
+| Column | Meaning |
+| ------ | ------- |
+| `Location` | TLA+ action or expression being measured |
+| `Distinct` | Number of new distinct states produced |
+| `Total` | Number of times TLC evaluated/generated states for that action |
 
 For example:
 
@@ -642,6 +875,7 @@ Agreement
 Validity
 Integrity
 AcceptImpliesWrite
+OrderedDelivery
 ```
 
 ### TypeOK
@@ -651,36 +885,50 @@ Checks that the model state has the expected structure.
 For example:
 
 ```text
-proposal messages have valid senders and values
-write messages have valid senders and values
-accept messages have valid senders and values
+instances has one record per consensus instance
+proposal/write/accept messages have valid senders and values
 decided values are valid
+delivered sets contain valid consensus instance numbers
+currentConsensus is valid
 ```
 
 ### Agreement
 
-Checks that no two correct replicas decide different values.
+Checks that no two correct replicas decide different values for the same consensus instance.
 
 Bad example:
 
 ```text
-Replica 1 decides v1
-Replica 2 decides v2
+Consensus 1:
+  Replica 1 decides v1
+  Replica 2 decides v2
 ```
 
 If both replicas are correct, this should never happen.
 
 ### Validity
 
-Checks that a correct replica only decides a value that was proposed by the leader.
+Checks that correct replicas only decide values from the modeled value set and, depending on the model definition, values that are properly proposed.
 
 ### Integrity
 
-Checks that a correct replica only decides after the required ACCEPT quorum exists.
+Checks that a correct replica only decides under the required decision conditions.
 
 ### AcceptImpliesWrite
 
 Checks that if a correct replica sends an ACCEPT for a value, then there was already a WRITE quorum for that value.
+
+### OrderedDelivery
+
+Checks that replicas deliver consensus instances in order.
+
+Bad example:
+
+```text
+Replica 1 delivers consensus 2 before consensus 1.
+```
+
+This should never happen in a replicated state machine.
 
 ---
 
@@ -695,27 +943,27 @@ For the selected finite configuration, TLC did not find a behavior where the che
 For example, with:
 
 ```text
-Replicas = {1,2,3,4}
+Replicas = {1,2,3,4,5,6,7}
 Values = {v1,v2}
-F = 1
-Faulty = {4}
+MaxConsensus = 2
+F = 2
+Faulty = {4,5}
 Leader = 1
 ```
 
 a successful run means:
 
 ```text
-The simplified model did not allow two correct replicas to decide different values.
-Correct replicas only decided proposed values.
+The simplified multi-consensus model did not allow two correct replicas to decide different values in the same consensus instance.
 Correct replicas only decided after the required quorum conditions.
+Correct replicas delivered consensus instances in order.
 ```
 
 However, this does not prove the full BFT-SMaRt implementation correct.
 
-The model is a simplified abstraction. It currently focuses on one consensus instance and abstracts away:
+The model is a simplified abstraction. It currently focuses on the normal consensus phase and abstracts away:
 
 ```text
-multiple consensus instances
 real client request queues
 actual batching logic
 network delays and message loss
@@ -724,12 +972,13 @@ state transfer
 reconfiguration
 cryptographic MACs/signatures
 Java implementation threads and queues
+performance behavior
 ```
 
 The correct interpretation is:
 
 ```text
-TLC confirms that our simplified single-instance model satisfies the checked safety properties under the tested configuration.
+TLC confirms that our simplified multi-consensus model satisfies the checked safety properties under the tested finite configurations.
 ```
 
 The result should not be interpreted as:
@@ -748,34 +997,43 @@ Reports are written to:
 
 ```text
 reports/
-```
+````
 
 Example:
 
 ```text
-reports/SmartBFT_faulty_1_nonleader.html
+reports/bft-f1-correct-leader.html
 ```
 
-The HTML report includes:
+The HTML report is mainly useful when TLC coverage is enabled. Coverage is what allows the report to show which actions were explored, how many states they produced, and whether important actions such as `FaultyLeaderPropose`, `CorrectWrite`, `FaultyAccept`, `Decide`, and `Deliver` were actually reached.
 
-* state summary,
-* coverage table,
-* raw TLC coverage lines,
-* state graph image if generated with `make png` or `make svg`.
+The Makefile runs TLC with coverage disabled by default:
+
+```bash
+TLC_BASE_OPTS ?= -workers auto #-coverage
+```
+
+This means that the HTML report may still be generated, but it will contain much less useful information. In that case, the raw TLC output is usually enough because the report cannot show meaningful coverage rows.
+
+To enable coverage, uncomment the `-coverage` option in the Makefile (around line 39):
+
+```bash
+TLC_BASE_OPTS ?= -workers auto -coverage
+```
 
 To generate a report without a graph:
 
 ```bash
-make check CFG=configs/SmartBFT_faulty_1_nonleader.cfg
+make check-f1-correct-leader
 ```
 
 To generate a report with a PNG graph:
 
 ```bash
-make png CFG=configs/SmartBFT_tiny.cfg
+make png-tiny
 ```
 
-Use the tiny config for graph reports because large BFT configurations may produce very large graphs.
+Use the tiny config for graph reports because larger BFT configurations may produce very large graphs.
 
 ---
 
@@ -799,6 +1057,8 @@ FaultyWrite
 CorrectAccept
 FaultyAccept
 Decide
+Deliver
+AdvanceConsensus
 Stutter
 ```
 
@@ -844,9 +1104,7 @@ Cmd + Shift + P
 TLA+: Check model with TLC
 ```
 
-4. Select a worker count and coverge print interval (mins). The makefile uses auto for the worker count and coverage of 1 min.
-
-The VS Code extension normally uses the matching `.cfg` file with the same base name as the `.tla` file.
+The VS Code extension normally expects a matching `.cfg` file with the same base name as the `.tla` file.
 
 For example:
 
@@ -855,7 +1113,7 @@ SmartBFT.tla
 SmartBFT.cfg
 ```
 
-The Makefile workflow is recommended for this project because it supports multiple configs and automatically writes outputs, graphs, and HTML reports.
+The Makefile workflow is recommended for this project because it supports multiple named configs and automatically writes outputs, graphs, and HTML reports.
 
 ---
 
@@ -864,18 +1122,24 @@ The Makefile workflow is recommended for this project because it supports multip
 The Makefile internally runs commands of this form:
 
 ```bash
-java -jar tla2tools.jar -workers auto -coverage 1 -metadir .tlc-meta -config configs/SmartBFT_tiny.cfg SmartBFT.tla
+java -jar tla2tools.jar -workers auto -metadir .tlc-meta -config configs/bft-f1-faulty-nonleader.cfg SmartBFT.tla
+```
+
+With coverage enabled:
+
+```bash
+java -jar tla2tools.jar -workers 1 -coverage 1 -metadir .tlc-meta -config configs/bft-f1-faulty-nonleader.cfg SmartBFT.tla
 ```
 
 ### Important TLC Options
 
-| Option               | Meaning                                         |
-| -------------------- | ----------------------------------------------- |
-| `-config file`       | Tells TLC which `.cfg` file to use              |
-| `-coverage num`      | Prints coverage information every `num` minutes |
-| `-dump dot,... file` | Dumps the state graph in Graphviz DOT format    |
-| `-metadir dir`       | Stores TLC metadata in a chosen directory       |
-| `-workers num/auto`  | Sets the number of TLC worker threads           |
+| Option | Meaning |
+| ------ | ------- |
+| `-config file` | Tells TLC which `.cfg` file to use |
+| `-coverage num` | Prints coverage information every `num` minutes |
+| `-dump dot,... file` | Dumps the state graph in Graphviz DOT format |
+| `-metadir dir` | Stores TLC metadata in a chosen directory |
+| `-workers num/auto` | Sets the number of TLC worker threads |
 
 More information about TLC command-line options is available here:
 
@@ -887,50 +1151,66 @@ Section 2.3 of that document lists current TLC command-line options.
 
 ### Manual TLC Command
 
-A manual TLC run looks like:
-
 ```bash
-java -jar tla2tools.jar -workers auto -coverage 1 -metadir .tlc-meta -config configs/SmartBFT_faulty_1_nonleader.cfg SmartBFT.tla
+java -jar tla2tools.jar -workers auto -metadir .tlc-meta -config configs/bft-f2-faulty-nonleaders.cfg SmartBFT.tla
 ```
 
 ### Manual DOT Graph Command
 
 ```bash
-java -jar tla2tools.jar -workers auto -coverage 1 -metadir .tlc-meta -config configs/SmartBFT_tiny.cfg SmartBFT.tla -dump dot,actionlabels,colorize graphs/SmartBFT_tiny.dot
+java -jar tla2tools.jar -workers auto -metadir .tlc-meta -config configs/debug-2replicas-f0.cfg SmartBFT.tla -dump dot,actionlabels,colorize graphs/debug-2replicas-f0.dot
 ```
 
 ### Convert DOT to PNG
 
 ```bash
-dot -Tpng graphs/SmartBFT_tiny.dot -o graphs/SmartBFT_tiny.png
+dot -Tpng graphs/debug-2replicas-f0.dot -o graphs/debug-2replicas-f0.png
 ```
 
 ### Convert DOT to SVG
 
 ```bash
-dot -Tsvg graphs/SmartBFT_tiny.dot -o graphs/SmartBFT_tiny.svg
+dot -Tsvg graphs/debug-2replicas-f0.dot -o graphs/debug-2replicas-f0.svg
 ```
 
 ---
 
 ## Summary
 
-To run the main check:
+To run the small visualization/debug config:
 
 ```bash
-make check CFG=configs/SmartBFT_faulty_1_nonleader.cfg
+make check-tiny
 ```
 
-To test a Byzantine leader:
+To run the fault-free config:
 
 ```bash
-make check CFG=configs/SmartBFT_faulty_1_leader.cfg
+make check-no-faults
+```
+
+To test a Byzantine leader with `F = 1`:
+
+```bash
+make check-f1-leader
+```
+
+To test a Byzantine non-leader with `F = 1`:
+
+```bash
+make check-f1-nonleader
+```
+
+To test a larger `F = 2` setup with a correct leader:
+
+```bash
+make check-f2-nonleaders
 ```
 
 To generate a small visual state graph:
 
 ```bash
-make png CFG=configs/SmartBFT_tiny.cfg
+make png-tiny
 ```
 
 To clean generated files:
