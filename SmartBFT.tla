@@ -62,10 +62,11 @@ VARIABLES
 \*   acceptMsgs, \* ACCEPT messages sent by replicas
 \*   decided \* decided[r] = value decided by replica r, or NoValue
     instances, \* instances[c] = state of consensus instance c, including proposalMsgs, writeMsgs, acceptMsgs, and decided
-    delivered \* delivered[r] = set of consensus instances that replica r has delivered/decided
+    delivered, \* delivered[r] = set of consensus instances that replica r has delivered/decided
+    currentConsensus \* currentConsensus = the consensus instance that is currently being processed by the protocol
 
 
-vars == << instances, delivered >>  \* Tuple of all model state variables, used for stuttering and the temporal spec.
+vars == << instances, delivered, currentConsensus >>  \* Tuple of all model state variables, used for stuttering and the temporal spec.
 
 
 (*
@@ -121,6 +122,7 @@ TypeOK ==
     /\ delivered
         \in
             [Replicas -> SUBSET Consensus]
+    /\ currentConsensus \in Consensus
 (*
 Example of decided:
 
@@ -157,6 +159,8 @@ Init ==
     /\ delivered =
 
         [r \in Replicas |-> {}]
+
+    /\ currentConsensus = 1
 
 (***************************************************************************)
 (* Helper predicates                                                        *)
@@ -251,7 +255,7 @@ PreviousDelivered(r,c) ==
 *)
 CorrectLeaderPropose ==
   /\ Leader \in Correct
-  /\ \E c \in Consensus:
+  /\ LET c == currentConsensus IN
       /\ instances[c].proposalMsgs = {}
       /\ \E v \in Values:
           /\ instances' =
@@ -261,7 +265,7 @@ CorrectLeaderPropose ==
                           [ sender |-> Leader,
                             value |-> v ]
                       }]
-          /\ UNCHANGED delivered
+          /\ UNCHANGED << delivered, currentConsensus >>
 (*
     Byzantine leader behavior:
 
@@ -280,7 +284,7 @@ CorrectLeaderPropose ==
 *)
 FaultyLeaderPropose ==
   /\ Leader \in Faulty
-  /\ \E c \in Consensus:
+  /\ LET c == currentConsensus IN
       /\ \E v \in Values:
           /\ [ sender |-> Leader,
                value |-> v ]
@@ -292,7 +296,7 @@ FaultyLeaderPropose ==
                           [ sender |-> Leader,
                             value |-> v ]
                       }]
-          /\ UNCHANGED delivered
+          /\ UNCHANGED << delivered, currentConsensus >>
 (*
     Correct replica WRITE behavior:
 
@@ -314,7 +318,7 @@ FaultyLeaderPropose ==
 *)
 
 CorrectWrite ==
-  \E c \in Consensus:
+  LET c == currentConsensus IN
     \E r \in Correct:
       \E v \in Values:
         /\ HasProposal(c,v)
@@ -326,7 +330,7 @@ CorrectWrite ==
                         [ sender |-> r,
                           value |-> v ]
                     }]
-          /\ UNCHANGED delivered
+          /\ UNCHANGED << delivered, currentConsensus >>
 (*
     Byzantine replica WRITE behavior:
 
@@ -341,7 +345,7 @@ CorrectWrite ==
 *)
 
 FaultyWrite ==
-  \E c \in Consensus:
+  LET c == currentConsensus IN
     \E r \in Faulty:
       \E v \in Values:
         /\ [ sender |-> r,
@@ -354,7 +358,7 @@ FaultyWrite ==
                         [ sender |-> r,
                           value |-> v ]
                     }]
-        /\ UNCHANGED delivered
+        /\ UNCHANGED << delivered, currentConsensus >>
 (*
     Correct replica ACCEPT behavior:
 
@@ -373,7 +377,7 @@ FaultyWrite ==
     6. Leaves proposalMsgs, acceptMsgs, and decided unchanged.
 *)
 CorrectAccept ==
-  \E c \in Consensus:
+  LET c == currentConsensus IN
     \E r \in Correct:
       \E v \in Values:
         /\ WriteQuorum(c,v)
@@ -385,7 +389,7 @@ CorrectAccept ==
                         [ sender |-> r,
                           value |-> v ]
                     }]
-        /\ UNCHANGED delivered
+        /\ UNCHANGED << delivered, currentConsensus >>
 (*
     Byzantine replica ACCEPT behavior:
 
@@ -398,7 +402,7 @@ CorrectAccept ==
     5. Leaves proposalMsgs, acceptMsgs, and decided unchanged.
 *)
 FaultyAccept ==
-  \E c \in Consensus:
+  LET c == currentConsensus IN
     \E r \in Faulty:
       \E v \in Values:
         /\ [ sender |-> r,
@@ -411,7 +415,7 @@ FaultyAccept ==
                         [ sender |-> r,
                           value |-> v ]
                     }]
-        /\ UNCHANGED delivered
+        /\ UNCHANGED << delivered, currentConsensus >>
 
 (*
     Decide behavior:
@@ -430,7 +434,7 @@ FaultyAccept ==
 *)
 
 Decide ==
-  \E c \in Consensus:
+  LET c == currentConsensus IN
     \E r \in Correct:
       \E v \in Values:
         /\ instances[c].decided[r] = NoValue
@@ -438,11 +442,11 @@ Decide ==
         /\ instances' =
             [instances EXCEPT
                 ![c].decided[r] = v]
-        /\ UNCHANGED delivered
+        /\ UNCHANGED << delivered, currentConsensus >>
 
 Deliver ==
 
-    \E c \in Consensus:
+    LET c == currentConsensus IN
     \E r \in Correct:
 
         /\ instances[c].decided[r] # NoValue
@@ -457,7 +461,18 @@ Deliver ==
                 ![r] =
                     @ \cup {c}]
 
-        /\ UNCHANGED instances
+        /\ UNCHANGED << instances, currentConsensus >>
+        
+AdvanceConsensus ==
+
+    /\ currentConsensus < MaxConsensus
+
+    /\ \A r \in Correct :
+        currentConsensus \in delivered[r]
+
+    /\ currentConsensus' = currentConsensus + 1
+
+    /\ UNCHANGED << instances, delivered >>
 
 (*
     Stuttering allows the model to stop changing without TLC reporting
