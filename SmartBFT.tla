@@ -20,7 +20,10 @@ CONSTANTS Replicas,    \* Set of all replicas, e.g. {1,2,3,4}
          F,    \* Maximum number of Byzantine faulty replicas
          Faulty,    \* Set of replicas that may behave Byzantine
          Leader,    \* The current leader for this consensus instance
-         NoValue \* Special value meaning "this replica has not decided yet"
+         NoValue, \* Special value meaning "this replica has not decided yet"
+         MaxConsensus
+
+Consensus == 1..MaxConsensus
 (*
     Basic BFT assumptions.
 
@@ -39,6 +42,7 @@ ASSUME /\ 3 * F < Cardinality(Replicas) \* Ensures the BFT requirement n >= 3F +
        /\ Cardinality(Faulty) <= F \* Ensures the number of faulty replicas does not exceed F.
        /\ Leader \in Replicas \* Ensures the leader is a valid replica.
        /\ NoValue \notin Values  \* Ensures NoValue is only used as the "not decided yet" marker.
+       /\ Consensus # {}
 
 Correct == Replicas \ Faulty  \* Get all correct replicas by taking the set difference between the set of all replicas and the set of faulty replicas.
 
@@ -53,12 +57,15 @@ Correct == Replicas \ Faulty  \* Get all correct replicas by taking the set diff
 Quorum == 2 * F + 1
 
 VARIABLES
-  proposalMsgs, \* PROPOSE messages sent by the leader
-  writeMsgs, \* WRITE messages sent by replicas
-  acceptMsgs, \* ACCEPT messages sent by replicas
-  decided \* decided[r] = value decided by replica r, or NoValue
+\*   proposalMsgs, \* PROPOSE messages sent by the leader
+\*   writeMsgs, \* WRITE messages sent by replicas
+\*   acceptMsgs, \* ACCEPT messages sent by replicas
+\*   decided \* decided[r] = value decided by replica r, or NoValue
+    instances, \* instances[c] = state of consensus instance c, including proposalMsgs, writeMsgs, acceptMsgs, and decided
+    delivered \* delivered[r] = set of consensus instances that replica r has delivered/decided
 
-vars == << proposalMsgs, writeMsgs, acceptMsgs, decided >>  \* Tuple of all model state variables, used for stuttering and the temporal spec.
+
+vars == << instances, delivered >>  \* Tuple of all model state variables, used for stuttering and the temporal spec.
 
 
 (*
@@ -74,14 +81,46 @@ vars == << proposalMsgs, writeMsgs, acceptMsgs, decided >>  \* Tuple of all mode
     already separated into proposalMsgs, writeMsgs, and acceptMsgs.
 *)
 
+ProposalMsg ==
+    [sender : {Leader},
+     value : Values]
+
+VoteMsg ==
+    [sender : Replicas,
+     value : Values]
+
+InstanceState ==
+[
+    proposalMsgs : SUBSET ProposalMsg,
+    writeMsgs :
+        SUBSET
+            VoteMsg,
+
+    acceptMsgs :
+        SUBSET
+            VoteMsg,
+
+    decided :
+        [Replicas ->
+            Values \cup {NoValue}]
+]
+
 \* TYPEOK is an invariant that checks whether the model state has the correct “shape/type.”
 
-TypeOK == 
-  /\ proposalMsgs \subseteq [sender:{ Leader }, value:Values ] \* Every proposal message must be a record where sender is the leader and value is one of the valid values.
-  /\ writeMsgs \subseteq [sender:Replicas, value:Values ] \* Every write message must be a record where sender is a replica and value is one of the valid values.
-  /\ acceptMsgs \subseteq [sender:Replicas, value:Values ] \* Every accept message must be a record where sender is a replica and value is one of the valid values.
-  /\ decided \in [Replicas -> Values \cup { NoValue }] \* Every replica's decision must be either a valid value or the "not decided yet" marker.
+TypeOK ==
+\*   /\ proposalMsgs \subseteq [sender:{ Leader }, value:Values ] \* Every proposal message must be a record where sender is the leader and value is one of the valid values.
+\*   /\ writeMsgs \subseteq [sender:Replicas, value:Values ] \* Every write message must be a record where sender is a replica and value is one of the valid values.
+\*   /\ acceptMsgs \subseteq [sender:Replicas, value:Values ] \* Every accept message must be a record where sender is a replica and value is one of the valid values.
+\*   /\ decided \in [Replicas -> Values \cup { NoValue }] \* Every replica's decision must be either a valid value or the "not decided yet" marker.
 
+    /\ instances
+        \in
+            [Consensus ->
+                InstanceState]
+
+    /\ delivered
+        \in
+            [Replicas -> SUBSET Consensus]
 (*
 Example of decided:
 
@@ -94,28 +133,105 @@ decided = [
 *)
 
 Init ==
-  /\ proposalMsgs = {}
-  /\ writeMsgs = {}
-  /\ acceptMsgs = {}
-  /\ decided = [r \in Replicas |-> NoValue]
 
+    /\ instances =
+
+        [c \in Consensus |->
+
+            [
+
+                proposalMsgs |-> {},
+
+                writeMsgs |-> {},
+
+                acceptMsgs |-> {},
+
+                decided |->
+
+                    [r \in Replicas |->
+                        NoValue]
+
+            ]
+        ]
+
+    /\ delivered =
+
+        [r \in Replicas |-> {}]
 
 (***************************************************************************)
 (* Helper predicates                                                        *)
 (***************************************************************************)
-HasProposal(v) == [ sender |-> Leader, value |-> v ] \in proposalMsgs \* Checks if the leader has proposed value v by looking for a proposal message from the leader with that value.
+HasProposal(c,v) ==
 
-HasWriteFrom(r) == \E v \in Values: [ sender |-> r, value |-> v ] \in writeMsgs \* Checks whether replica r has already sent a WRITE message for any value.
+    [sender |-> Leader,
+     value |-> v]
 
-HasAcceptFrom(r) == \E v \in Values: [ sender |-> r, value |-> v ] \in acceptMsgs \* Checks whether replica r has already sent a ACCEPT message for any value.
+        \in
+        instances[c].proposalMsgs
 
-WriteSenders(v) == {r \in Replicas: [ sender |-> r, value |-> v ] \in writeMsgs} \* Returns the set of replicas that have sent a WRITE message for value v.
+HasWriteFrom(c,r) ==
 
-AcceptSenders(v) =={r \in Replicas: [ sender |-> r, value |-> v ] \in acceptMsgs} \* Returns the set of replicas that have sent an ACCEPT message for value v.
+    \E v \in Values :
 
-WriteQuorum(v) == Cardinality(WriteSenders(v)) >= Quorum \* True if enough replicas have sent WRITE messages for value v.
+        [sender |-> r,
+         value |-> v]
 
-AcceptQuorum(v) == Cardinality(AcceptSenders(v)) >= Quorum \* True if enough replicas have sent ACCEPT messages for value v.
+        \in
+        instances[c].writeMsgs
+        
+HasAcceptFrom(c,r) ==
+
+    \E v \in Values :
+
+        [sender |-> r,
+         value |-> v]
+
+        \in
+        instances[c].acceptMsgs
+
+WriteSenders(c,v) ==
+
+{
+    r \in Replicas :
+
+        [sender |-> r,
+         value |-> v]
+
+            \in
+            instances[c].writeMsgs
+}
+
+AcceptSenders(c,v) ==
+
+{
+    r \in Replicas :
+
+        [sender |-> r,
+         value |-> v]
+
+            \in
+            instances[c].acceptMsgs
+}
+
+WriteQuorum(c,v) ==
+
+Cardinality(WriteSenders(c,v))
+    >=
+Quorum
+
+AcceptQuorum(c,v) ==
+
+Cardinality(AcceptSenders(c,v))
+    >=
+Quorum
+
+PreviousDelivered(r,c) ==
+
+    c = 1
+
+    \/
+
+    (c - 1) \in delivered[r]
 
 (***************************************************************************)
 (* Protocol actions                                                         *)
@@ -135,12 +251,17 @@ AcceptQuorum(v) == Cardinality(AcceptSenders(v)) >= Quorum \* True if enough rep
 *)
 CorrectLeaderPropose ==
   /\ Leader \in Correct
-  /\ proposalMsgs = {}
-  /\ \E v \in Values:
-       /\ proposalMsgs' =
-            proposalMsgs \cup { [ sender |-> Leader, value |-> v ] }
-       /\ UNCHANGED << writeMsgs, acceptMsgs, decided >>
-
+  /\ \E c \in Consensus:
+      /\ instances[c].proposalMsgs = {}
+      /\ \E v \in Values:
+          /\ instances' =
+              [instances EXCEPT
+                  ![c].proposalMsgs =
+                      @ \cup {
+                          [ sender |-> Leader,
+                            value |-> v ]
+                      }]
+          /\ UNCHANGED delivered
 (*
     Byzantine leader behavior:
 
@@ -159,12 +280,19 @@ CorrectLeaderPropose ==
 *)
 FaultyLeaderPropose ==
   /\ Leader \in Faulty
-  /\ \E v \in Values:
-       /\ [ sender |-> Leader, value |-> v ] \notin proposalMsgs
-       /\ proposalMsgs' =
-            proposalMsgs \cup { [ sender |-> Leader, value |-> v ] }
-       /\ UNCHANGED << writeMsgs, acceptMsgs, decided >>
-
+  /\ \E c \in Consensus:
+      /\ \E v \in Values:
+          /\ [ sender |-> Leader,
+               value |-> v ]
+               \notin instances[c].proposalMsgs
+          /\ instances' =
+              [instances EXCEPT
+                  ![c].proposalMsgs =
+                      @ \cup {
+                          [ sender |-> Leader,
+                            value |-> v ]
+                      }]
+          /\ UNCHANGED delivered
 (*
     Correct replica WRITE behavior:
 
@@ -186,13 +314,19 @@ FaultyLeaderPropose ==
 *)
 
 CorrectWrite ==
-  \E r \in Correct:
-    \E v \in Values:
-      /\ HasProposal(v)
-      /\ ~HasWriteFrom(r)
-      /\ writeMsgs' = writeMsgs \cup { [ sender |-> r, value |-> v ] }
-      /\ UNCHANGED << proposalMsgs, acceptMsgs, decided >>
-
+  \E c \in Consensus:
+    \E r \in Correct:
+      \E v \in Values:
+        /\ HasProposal(c,v)
+        /\ ~HasWriteFrom(c,r)
+        /\ instances' =
+            [instances EXCEPT
+                ![c].writeMsgs =
+                    @ \cup {
+                        [ sender |-> r,
+                          value |-> v ]
+                    }]
+          /\ UNCHANGED delivered
 (*
     Byzantine replica WRITE behavior:
 
@@ -207,12 +341,20 @@ CorrectWrite ==
 *)
 
 FaultyWrite ==
-  \E r \in Faulty:
-    \E v \in Values:
-      /\ [ sender |-> r, value |-> v ] \notin writeMsgs
-      /\ writeMsgs' = writeMsgs \cup { [ sender |-> r, value |-> v ] }
-      /\ UNCHANGED << proposalMsgs, acceptMsgs, decided >>
-
+  \E c \in Consensus:
+    \E r \in Faulty:
+      \E v \in Values:
+        /\ [ sender |-> r,
+             value |-> v ]
+             \notin instances[c].writeMsgs
+        /\ instances' =
+            [instances EXCEPT
+                ![c].writeMsgs =
+                    @ \cup {
+                        [ sender |-> r,
+                          value |-> v ]
+                    }]
+        /\ UNCHANGED delivered
 (*
     Correct replica ACCEPT behavior:
 
@@ -231,13 +373,19 @@ FaultyWrite ==
     6. Leaves proposalMsgs, acceptMsgs, and decided unchanged.
 *)
 CorrectAccept ==
-  \E r \in Correct:
-    \E v \in Values:
-      /\ WriteQuorum(v)
-      /\ ~HasAcceptFrom(r)
-      /\ acceptMsgs' = acceptMsgs \cup { [ sender |-> r, value |-> v ] }
-      /\ UNCHANGED << proposalMsgs, writeMsgs, decided >>
-
+  \E c \in Consensus:
+    \E r \in Correct:
+      \E v \in Values:
+        /\ WriteQuorum(c,v)
+        /\ ~HasAcceptFrom(c,r)
+        /\ instances' =
+            [instances EXCEPT
+                ![c].acceptMsgs =
+                    @ \cup {
+                        [ sender |-> r,
+                          value |-> v ]
+                    }]
+        /\ UNCHANGED delivered
 (*
     Byzantine replica ACCEPT behavior:
 
@@ -250,11 +398,20 @@ CorrectAccept ==
     5. Leaves proposalMsgs, acceptMsgs, and decided unchanged.
 *)
 FaultyAccept ==
-  \E r \in Faulty:
-    \E v \in Values:
-      /\ [ sender |-> r, value |-> v ] \notin acceptMsgs
-      /\ acceptMsgs' = acceptMsgs \cup { [ sender |-> r, value |-> v ] }
-      /\ UNCHANGED << proposalMsgs, writeMsgs, decided >>
+  \E c \in Consensus:
+    \E r \in Faulty:
+      \E v \in Values:
+        /\ [ sender |-> r,
+             value |-> v ]
+             \notin instances[c].acceptMsgs
+        /\ instances' =
+            [instances EXCEPT
+                ![c].acceptMsgs =
+                    @ \cup {
+                        [ sender |-> r,
+                          value |-> v ]
+                    }]
+        /\ UNCHANGED delivered
 
 (*
     Decide behavior:
@@ -273,12 +430,34 @@ FaultyAccept ==
 *)
 
 Decide ==
-  \E r \in Correct:
-    \E v \in Values: 
-      /\ decided[r] = NoValue
-      /\ AcceptQuorum(v)
-      /\ decided' = [decided EXCEPT ![r] = v]
-      /\ UNCHANGED << proposalMsgs, writeMsgs, acceptMsgs >>
+  \E c \in Consensus:
+    \E r \in Correct:
+      \E v \in Values:
+        /\ instances[c].decided[r] = NoValue
+        /\ AcceptQuorum(c,v)
+        /\ instances' =
+            [instances EXCEPT
+                ![c].decided[r] = v]
+        /\ UNCHANGED delivered
+
+Deliver ==
+
+    \E c \in Consensus:
+    \E r \in Correct:
+
+        /\ instances[c].decided[r] # NoValue
+
+        /\ c \notin delivered[r]
+
+        /\ PreviousDelivered(r,c)
+
+        /\ delivered' =
+
+            [delivered EXCEPT
+                ![r] =
+                    @ \cup {c}]
+
+        /\ UNCHANGED instances
 
 (*
     Stuttering allows the model to stop changing without TLC reporting
@@ -300,6 +479,7 @@ Next ==
   \/ CorrectAccept
   \/ FaultyAccept
   \/ Decide
+  \/ Deliver
   \/ Stutter
 
 
@@ -317,10 +497,14 @@ Next ==
     and both have decided something (not NoValue), then they must have decided the same value.
     
 *)
-Agreement == \A r1, r2 \in Correct: /\ decided[r1] # NoValue
-                                    /\ decided[r2] # NoValue
-    => decided[r1] = decided[r2]
-
+Agreement ==
+  \A c \in Consensus:
+    \A r1,r2 \in Correct:
+      /\ instances[c].decided[r1] # NoValue
+      /\ instances[c].decided[r2] # NoValue
+      => instances[c].decided[r1]
+         =
+         instances[c].decided[r2]
 (*
     Validity:
 
@@ -329,16 +513,26 @@ Agreement == \A r1, r2 \in Correct: /\ decided[r1] # NoValue
 
     This prevents deciding completely invented values.
 *)
-Validity == \A r \in Correct: decided[r] # NoValue => HasProposal(decided[r])
-
+Validity ==
+  \A c \in Consensus:
+    \A r \in Correct:
+      instances[c].decided[r] # NoValue
+        =>
+      HasProposal(c,
+                  instances[c].decided[r])
 (*
     Integrity:
 
     A correct replica only decides a value if there is an ACCEPT quorum
     for that value.
 *)
-Integrity == \A r \in Correct: decided[r] # NoValue => AcceptQuorum(decided[r])
-
+Integrity ==
+  \A c \in Consensus:
+    \A r \in Correct:
+      instances[c].decided[r] # NoValue
+        =>
+      AcceptQuorum(c,
+                   instances[c].decided[r])
 (*
     AcceptImpliesWrite:
 
@@ -346,8 +540,11 @@ Integrity == \A r \in Correct: decided[r] # NoValue => AcceptQuorum(decided[r])
     been a WRITE quorum for v.
 *)
 AcceptImpliesWrite ==
-  \A m \in acceptMsgs: m.sender \in Correct => WriteQuorum(m.value)
-
+  \A c \in Consensus:
+    \A m \in instances[c].acceptMsgs:
+      m.sender \in Correct
+        =>
+      WriteQuorum(c,m.value)
 (*
     Optional full behavior specification.
     You can use this from the cfg with:
@@ -361,4 +558,10 @@ AcceptImpliesWrite ==
 *)
 \* Spec == Init /\ [][Next]_vars
 
+OrderedDelivery ==
+
+    \A r \in Replicas:
+        \A c \in delivered[r]:
+            \A d \in Consensus:
+                d < c => d \in delivered[r]                
 =============================================================================
