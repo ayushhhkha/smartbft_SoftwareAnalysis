@@ -135,7 +135,7 @@ This prints the available commands and examples.
 ### Run TLC on a Config
 
 ```bash
-make check CFG=configs/SmartBFT_faulty_nonleader.cfg
+make check CFG=configs/SmartBFT_faulty_1_nonleader.cfg
 ```
 
 This command:
@@ -149,14 +149,14 @@ This command:
 Example:
 
 ```bash
-make check CFG=configs/SmartBFT_faulty_nonleader.cfg
+make check CFG=configs/SmartBFT_faulty_1_leader.cfg
 ```
 
 Generated files:
 
 ```text
-outputs/SmartBFT_faulty_nonleader.out
-reports/SmartBFT_faulty_nonleader.html
+outputs/SmartBFT_faulty_1_nonleader.out
+reports/SmartBFT_faulty_1_nonleader.html
 ```
 
 ---
@@ -296,7 +296,7 @@ make png CFG=configs/SmartBFT_tiny.cfg
 
 ---
 
-### `SmartBFT_faulty_nonleader.cfg`
+### `SmartBFT_faulty_1_nonleader.cfg`
 
 Purpose:
 
@@ -327,12 +327,12 @@ No invariant violations should be found.
 Run with:
 
 ```bash
-make check CFG=configs/SmartBFT_faulty_nonleader.cfg
+make check CFG=configs/SmartBFT_faulty_1_nonleader.cfg
 ```
 
 ---
 
-### `SmartBFT_faulty_leader.cfg`
+### `SmartBFT_faulty_1_leader.cfg`
 
 Purpose:
 
@@ -363,7 +363,7 @@ No agreement violation should occur.
 Run with:
 
 ```bash
-make check CFG=configs/SmartBFT_faulty_leader.cfg
+make check CFG=configs/SmartBFT_faulty_1_leader.cfg
 ```
 
 ---
@@ -475,14 +475,14 @@ The Makefile generates files based on the chosen config name.
 For example:
 
 ```bash
-make check CFG=configs/SmartBFT_faulty_nonleader.cfg
+make check CFG=configs/SmartBFT_faulty_1_nonleader.cfg
 ```
 
 generates:
 
 ```text
-outputs/SmartBFT_faulty_nonleader.out
-reports/SmartBFT_faulty_nonleader.html
+outputs/SmartBFT_faulty_1_nonleader.out
+reports/SmartBFT_faulty_1_nonleader.html
 ```
 
 Running:
@@ -516,7 +516,7 @@ reports/SmartBFT_tiny.html
 When running a Makefile target such as:
 
 ```bash
-make check CFG=configs/SmartBFT_faulty_nonleader.cfg
+make check CFG=configs/SmartBFT_faulty_1_nonleader.cfg
 ```
 
 the terminal prints two kinds of output.
@@ -552,8 +552,8 @@ Example:
 ```text
 TLC Summary
 ============================================================
-Input:  outputs/SmartBFT_faulty_nonleader.out
-Report: reports/SmartBFT_faulty_nonleader.html
+Input:  outputs/SmartBFT_faulty_1_nonleader.out
+Report: reports/SmartBFT_faulty_1_nonleader.html
 
 State Summary
 ------------------------------------------------------------
@@ -753,7 +753,7 @@ reports/
 Example:
 
 ```text
-reports/SmartBFT_faulty_nonleader.html
+reports/SmartBFT_faulty_1_nonleader.html
 ```
 
 The HTML report includes:
@@ -766,7 +766,7 @@ The HTML report includes:
 To generate a report without a graph:
 
 ```bash
-make check CFG=configs/SmartBFT_faulty_nonleader.cfg
+make check CFG=configs/SmartBFT_faulty_1_nonleader.cfg
 ```
 
 To generate a report with a PNG graph:
@@ -890,7 +890,7 @@ Section 2.3 of that document lists current TLC command-line options.
 A manual TLC run looks like:
 
 ```bash
-java -jar tla2tools.jar -workers auto -coverage 1 -metadir .tlc-meta -config configs/SmartBFT_faulty_nonleader.cfg SmartBFT.tla
+java -jar tla2tools.jar -workers auto -coverage 1 -metadir .tlc-meta -config configs/SmartBFT_faulty_1_nonleader.cfg SmartBFT.tla
 ```
 
 ### Manual DOT Graph Command
@@ -918,13 +918,13 @@ dot -Tsvg graphs/SmartBFT_tiny.dot -o graphs/SmartBFT_tiny.svg
 To run the main check:
 
 ```bash
-make check CFG=configs/SmartBFT_faulty_nonleader.cfg
+make check CFG=configs/SmartBFT_faulty_1_nonleader.cfg
 ```
 
 To test a Byzantine leader:
 
 ```bash
-make check CFG=configs/SmartBFT_faulty_leader.cfg
+make check CFG=configs/SmartBFT_faulty_1_leader.cfg
 ```
 
 To generate a small visual state graph:
