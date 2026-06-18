@@ -495,6 +495,7 @@ Next ==
   \/ FaultyAccept
   \/ Decide
   \/ Deliver
+  \/ AdvanceConsensus
   \/ Stutter
 
 
