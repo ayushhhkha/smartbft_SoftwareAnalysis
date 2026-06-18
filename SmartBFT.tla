@@ -560,8 +560,9 @@ AcceptImpliesWrite ==
 
 OrderedDelivery ==
 
-    \A r \in Replicas:
+    \A r \in Correct:
         \A c \in delivered[r]:
             \A d \in Consensus:
-                d < c => d \in delivered[r]                
+                d < c => d \in delivered[r]
+                
 =============================================================================
