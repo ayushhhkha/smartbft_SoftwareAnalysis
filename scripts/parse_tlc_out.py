@@ -7,10 +7,6 @@ import os
 
 
 def short_location(location):
-    # Example:
-    # <CorrectLeaderPropose line 173, col 1 to line 173, col 21 of module SmartBFT ...>
-    # becomes:
-    # CorrectLeaderPropose
     location = location.strip()
 
     if location.startswith("<"):
@@ -22,28 +18,12 @@ def short_location(location):
 def parse_tlc_out(path: Path):
     text = path.read_text(errors="ignore")
 
-    # Parse state summary lines
-    state_summary = {}
-
-    patterns = {
-        "diameter": r"diameter[:\s]+(\d+)",
-        "distinct_states": r"(\d+) distinct states found",
-        "total_states": r"(\d+) states generated",
-        "queue_size": r"(\d+) states left on queue",
-    }
-
-    for key, pattern in patterns.items():
-        match = re.search(pattern, text, re.IGNORECASE)
-        if match:
-            state_summary[key] = int(match.group(1))
-
-    # Parse coverage/action lines.
-    # Example TLC coverage lines often contain something like:
-    # |line col to line col of module| count: distinct
     coverage_rows = []
 
-    coverage_pattern = re.compile(r"(?P<location><[^>]+>|\d+:\d+-\d+:\d+).*?"
-                                  r"(?P<distinct>\d+):(?P<count>\d+)")
+    coverage_pattern = re.compile(
+        r"(?P<location><[^>]+>|\d+:\d+-\d+:\d+).*?"
+        r"(?P<distinct>\d+):(?P<count>\d+)"
+    )
 
     for line in text.splitlines():
         match = coverage_pattern.search(line)
@@ -55,15 +35,12 @@ def parse_tlc_out(path: Path):
                 "raw_line": line.strip(),
             })
 
-    return state_summary, coverage_rows
+    return coverage_rows
 
 
-def write_html_report(path: Path,
-                      state_summary,
-                      coverage_rows,
-                      graph_path=None):
+def write_html_report(path: Path, coverage_rows, graph_path=None):
     html = []
-    html.append("<html><head><title>TLC Output Summary</title>")
+    html.append("<html><head><title>TLC Coverage Summary</title>")
     html.append("""
     <style>
       body { font-family: Arial, sans-serif; margin: 32px; }
@@ -74,25 +51,23 @@ def write_html_report(path: Path,
     </style>
     """)
     html.append("</head><body>")
-    html.append("<h1>TLC Output Summary</h1>")
-
-    html.append("<h2>State Summary</h2>")
-    html.append("<table><tr><th>Metric</th><th>Value</th></tr>")
-    for key, value in state_summary.items():
-        html.append(f"<tr><td>{key}</td><td>{value}</td></tr>")
-    html.append("</table>")
+    html.append("<h1>TLC Coverage Summary</h1>")
 
     html.append("<h2>Coverage Rows</h2>")
     html.append(
         "<table><tr><th>Action/Location</th><th>Total</th><th>Distinct</th><th>Raw line</th></tr>"
     )
+
     for row in coverage_rows:
-        location = escape(row["location"])
+        location = escape(short_location(row["location"]))
         raw_line = escape(row["raw_line"])
-        html.append(f"<tr><td><code>{location}</code></td>"
-                    f"<td>{row['count']}</td>"
-                    f"<td>{row['distinct']}</td>"
-                    f"<td><code>{raw_line}</code></td></tr>")
+        html.append(
+            f"<tr><td><code>{location}</code></td>"
+            f"<td>{row['count']}</td>"
+            f"<td>{row['distinct']}</td>"
+            f"<td><code>{raw_line}</code></td></tr>"
+        )
+
     html.append("</table>")
 
     if graph_path is not None:
@@ -112,24 +87,14 @@ def write_html_report(path: Path,
     path.write_text("\n".join(html))
 
 
-def print_terminal_summary(input_path, report_path, graph_path, state_summary,
-                           coverage_rows):
-    print("\nTLC Summary")
+def print_terminal_summary(input_path, report_path, graph_path, coverage_rows):
+    print("\nTLC Coverage Summary")
     print("=" * 60)
     print(f"Input:  {input_path}")
     print(f"Report: {report_path}")
 
     if graph_path is not None:
         print(f"Graph:  {graph_path}")
-
-    print("\nState Summary")
-    print("-" * 60)
-
-    if state_summary:
-        for key, value in state_summary.items():
-            print(f"{key:20} {value}")
-    else:
-        print("No state summary found.")
 
     print("\nTop Coverage Rows")
     print("-" * 60)
@@ -139,7 +104,7 @@ def print_terminal_summary(input_path, report_path, graph_path, state_summary,
     for row in coverage_rows:
         location = short_location(row.get("location", "unknown"))
         distinct = row.get("distinct", "")
-        total = row.get("total", row.get("count", ""))
+        total = row.get("count", "")
 
         print(f"{location:35} {total:>10} {distinct:>10}")
 
@@ -148,8 +113,10 @@ def print_terminal_summary(input_path, report_path, graph_path, state_summary,
 
 def main():
     if len(sys.argv) not in [3, 4]:
-        print("Usage: python parse_tlc_out.py path/to/output.out "
-              "path/to/report.html [path/to/state_graph.png]")
+        print(
+            "Usage: python parse_tlc_out.py path/to/output.out "
+            "path/to/report.html [path/to/state_graph.png]"
+        )
         sys.exit(1)
 
     input_path = Path(sys.argv[1])
@@ -166,12 +133,10 @@ def main():
 
     report_path.parent.mkdir(parents=True, exist_ok=True)
 
-    state_summary, coverage_rows = parse_tlc_out(input_path)
+    coverage_rows = parse_tlc_out(input_path)
 
-    print_terminal_summary(input_path, report_path, graph_path, state_summary,
-                           coverage_rows)
-
-    write_html_report(report_path, state_summary, coverage_rows, graph_path)
+    print_terminal_summary(input_path, report_path, graph_path, coverage_rows)
+    write_html_report(report_path, coverage_rows, graph_path)
 
     print("Generated:")
     print(f"- {report_path}")
