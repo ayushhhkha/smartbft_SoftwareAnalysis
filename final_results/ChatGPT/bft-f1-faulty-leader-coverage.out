@@ -1,0 +1,484 @@
+TLC2 Version 2.19 of 08 August 2024 (rev: 5a47802)
+Warning: Please run the Java VM which executes TLC with a throughput optimized garbage collector by passing the "-XX:+UseParallelGC" property.
+(Use the -nowarning option to disable this warning.)
+Running breadth-first search Model-Checking with fp 109 and seed 3088099517012023241 with 22 workers on 22 cores with 7796MB heap and 64MB offheap memory [pid: 56446] (Linux 7.0.0-22-generic amd64, Ubuntu 25.0.3 x86_64, MSBDiskFPSet, DiskStateQueue).
+Parsing file /home/jayran/Projects/Personal/SA_SMARTBFT/SmartBFT.tla
+Parsing file /tmp/Naturals.tla
+Parsing file /tmp/FiniteSets.tla
+Parsing file /tmp/Sequences.tla
+Semantic processing of module Naturals
+Semantic processing of module Sequences
+Semantic processing of module FiniteSets
+Semantic processing of module SmartBFT
+Starting... (2026-06-19 12:48:55)
+Computing initial states...
+Finished computing initial states: 1 distinct state generated at 2026-06-19 12:48:55.
+Progress(24) at 2026-06-19 12:48:58: 940,722 states generated (940,722 s/min), 244,237 distinct states found (244,237 ds/min), 105,704 states left on queue.
+Progress(31) at 2026-06-19 12:49:58: 26,603,119 states generated (25,662,397 s/min), 5,299,171 distinct states found (5,054,934 ds/min), 1,375,916 states left on queue.
+The coverage statistics at 2026-06-19 12:49:58
+<Init line 137, col 1 to line 137, col 4 of module SmartBFT>: 1:1
+  line 139, col 5 to line 163, col 27 of module SmartBFT: 1
+<CorrectLeaderPropose line 256, col 1 to line 256, col 20 of module SmartBFT>: 0:0
+  line 257, col 6 to line 257, col 23 of module SmartBFT: 3923583
+  |line 257, col 6 to line 257, col 11 of module SmartBFT: 3923592
+  |line 257, col 17 to line 257, col 23 of module SmartBFT: 3923597
+  line 261, col 14 to line 267, col 24 of module SmartBFT: 0
+  line 268, col 14 to line 268, col 56 of module SmartBFT: 0
+<FaultyLeaderPropose line 285, col 1 to line 285, col 19 of module SmartBFT>: 4041:1956544
+  line 286, col 6 to line 286, col 22 of module SmartBFT: 5871844
+  |line 286, col 6 to line 286, col 11 of module SmartBFT: 3923644
+  |line 286, col 17 to line 286, col 22 of module SmartBFT: 3923648
+  line 289, col 14 to line 291, col 47 of module SmartBFT: 9803851
+  |line 289, col 14 to line 290, col 28 of module SmartBFT: 7847322
+  |line 291, col 23 to line 291, col 47 of module SmartBFT: 7847336
+  line 292, col 14 to line 298, col 24 of module SmartBFT: 1956548
+  line 299, col 14 to line 299, col 56 of module SmartBFT: 1956544
+  line 288, col 19 to line 288, col 24 of module SmartBFT: 3923681
+<CorrectWrite line 320, col 1 to line 320, col 12 of module SmartBFT (324 9 333 56)>: 31061:3423767
+  line 170, col 5 to line 174, col 33 of module SmartBFT: 26966035
+  |line 170, col 5 to line 171, col 17 of module SmartBFT: 23542314
+  ||line 170, col 6 to line 170, col 22 of module SmartBFT: 23542183
+  ||line 171, col 6 to line 171, col 16 of module SmartBFT: 23542185
+  |line 174, col 9 to line 174, col 33 of module SmartBFT: 23542385
+  ||line 174, col 9 to line 174, col 20 of module SmartBFT: 23542419
+  |||line 174, col 9 to line 174, col 17 of module SmartBFT: 23542454
+  |||line 174, col 19 to line 174, col 19 of module SmartBFT: 23542487
+  line 324, col 24 to line 324, col 24 of module SmartBFT: 23542506
+  |line 321, col 12 to line 321, col 27 of module SmartBFT: 23542538
+  line 324, col 26 to line 324, col 26 of module SmartBFT: 23542567
+  line 325, col 12 to line 325, col 29 of module SmartBFT: 21096721
+  |line 325, col 13 to line 325, col 29 of module SmartBFT: 17672987
+  ||line 178, col 5 to line 184, col 30 of module SmartBFT: 17673028
+  |||line 180, col 9 to line 184, col 30 of module SmartBFT: 28220917
+  ||||line 180, col 9 to line 181, col 21 of module SmartBFT: 28220937
+  |||||line 180, col 10 to line 180, col 21 of module SmartBFT: 28220324
+  |||||line 181, col 10 to line 181, col 20 of module SmartBFT: 28220328
+  ||||line 184, col 9 to line 184, col 30 of module SmartBFT: 28220981
+  |||||line 184, col 9 to line 184, col 20 of module SmartBFT: 28220987
+  ||||||line 184, col 9 to line 184, col 17 of module SmartBFT: 28220994
+  ||||||line 184, col 19 to line 184, col 19 of module SmartBFT: 28221033
+  |||line 178, col 14 to line 178, col 19 of module SmartBFT: 17673189
+  ||line 325, col 26 to line 325, col 26 of module SmartBFT: 17673221
+  |||line 321, col 12 to line 321, col 27 of module SmartBFT: 17673252
+  ||line 325, col 28 to line 325, col 28 of module SmartBFT: 17673266
+  line 326, col 12 to line 332, col 22 of module SmartBFT: 3423772
+  line 333, col 14 to line 333, col 56 of module SmartBFT: 3423768
+<FaultyWrite line 347, col 1 to line 347, col 11 of module SmartBFT (351 9 361 54)>: 99664:3146856
+  line 351, col 12 to line 353, col 42 of module SmartBFT: 10994567
+  |line 351, col 12 to line 352, col 26 of module SmartBFT: 7847710
+  ||line 351, col 14 to line 351, col 25 of module SmartBFT: 7847693
+  ||line 352, col 14 to line 352, col 24 of module SmartBFT: 7847695
+  |line 353, col 21 to line 353, col 42 of module SmartBFT: 7847734
+  ||line 353, col 21 to line 353, col 32 of module SmartBFT: 7847744
+  |||line 353, col 21 to line 353, col 29 of module SmartBFT: 7847752
+  |||line 353, col 31 to line 353, col 31 of module SmartBFT: 7847760
+  line 354, col 12 to line 360, col 22 of module SmartBFT: 3146884
+  line 361, col 12 to line 361, col 54 of module SmartBFT: 3146862
+<CorrectAccept line 379, col 1 to line 379, col 13 of module SmartBFT (383 9 392 54)>: 261368:3136903
+  line 222, col 1 to line 224, col 6 of module SmartBFT: 3136912
+  |line 222, col 1 to line 222, col 30 of module SmartBFT: 23543510
+  ||line 222, col 13 to line 222, col 29 of module SmartBFT: 23543541
+  |||line 198, col 1 to line 206, col 1 of module SmartBFT: 23543588
+  ||||line 201, col 9 to line 205, col 34 of module SmartBFT: 94174513
+  |||||line 201, col 9 to line 202, col 21 of module SmartBFT: 94174631
+  ||||||line 201, col 10 to line 201, col 21 of module SmartBFT: 94173502
+  ||||||line 202, col 10 to line 202, col 20 of module SmartBFT: 94173517
+  |||||line 205, col 13 to line 205, col 34 of module SmartBFT: 94174973
+  ||||||line 205, col 13 to line 205, col 24 of module SmartBFT: 94175076
+  |||||||line 205, col 13 to line 205, col 21 of module SmartBFT: 94175236
+  |||||||line 205, col 23 to line 205, col 23 of module SmartBFT: 94175330
+  ||||line 199, col 11 to line 199, col 18 of module SmartBFT: 23543856
+  |line 224, col 1 to line 224, col 6 of module SmartBFT: 23543859
+  line 383, col 24 to line 383, col 24 of module SmartBFT: 23543891
+  line 383, col 26 to line 383, col 26 of module SmartBFT: 23543904
+  line 384, col 12 to line 384, col 30 of module SmartBFT: 14133667
+  |line 384, col 13 to line 384, col 30 of module SmartBFT: 10996734
+  ||line 188, col 5 to line 194, col 31 of module SmartBFT: 10996747
+  |||line 190, col 9 to line 194, col 31 of module SmartBFT: 18063113
+  ||||line 190, col 9 to line 191, col 21 of module SmartBFT: 18063123
+  ||||line 194, col 9 to line 194, col 31 of module SmartBFT: 18063148
+  |||line 188, col 14 to line 188, col 19 of module SmartBFT: 10996814
+  ||line 384, col 27 to line 384, col 27 of module SmartBFT: 10996829
+  |||line 380, col 12 to line 380, col 27 of module SmartBFT: 10996833
+  ||line 384, col 29 to line 384, col 29 of module SmartBFT: 10996858
+  line 385, col 12 to line 391, col 22 of module SmartBFT: 3136967
+  |line 386, col 13 to line 391, col 22 of module SmartBFT: 3136973
+  line 392, col 12 to line 392, col 54 of module SmartBFT: 3136911
+<FaultyAccept line 404, col 1 to line 404, col 12 of module SmartBFT (408 9 418 54)>: 773969:3484237
+  line 408, col 12 to line 410, col 43 of module SmartBFT: 11332390
+  |line 408, col 12 to line 409, col 26 of module SmartBFT: 7848149
+  ||line 408, col 14 to line 408, col 25 of module SmartBFT: 7848128
+  ||line 409, col 14 to line 409, col 24 of module SmartBFT: 7848130
+  |line 410, col 21 to line 410, col 43 of module SmartBFT: 7848184
+  line 411, col 12 to line 417, col 22 of module SmartBFT: 3484269
+  |line 412, col 13 to line 417, col 22 of module SmartBFT: 3484274
+  ||line 412, col 14 to line 412, col 22 of module SmartBFT: 3484275
+  ||line 413, col 17 to line 417, col 21 of module SmartBFT: 3484248
+  ||line 414, col 21 to line 417, col 21 of module SmartBFT: 3484282
+  line 418, col 12 to line 418, col 54 of module SmartBFT: 3484249
+<Decide line 436, col 1 to line 436, col 6 of module SmartBFT (440 9 445 54)>: 1738286:4513301
+  line 440, col 12 to line 440, col 44 of module SmartBFT: 28058155
+  |line 440, col 12 to line 440, col 34 of module SmartBFT: 23544862
+  ||line 440, col 12 to line 440, col 31 of module SmartBFT: 23544890
+  |||line 440, col 12 to line 440, col 23 of module SmartBFT: 23544896
+  ||||line 440, col 12 to line 440, col 20 of module SmartBFT: 23544934
+  ||||line 440, col 22 to line 440, col 22 of module SmartBFT: 23544941
+  ||line 440, col 33 to line 440, col 33 of module SmartBFT: 23544962
+  |line 440, col 38 to line 440, col 44 of module SmartBFT: 23544985
+  line 228, col 1 to line 230, col 6 of module SmartBFT: 4513352
+  |line 228, col 1 to line 228, col 31 of module SmartBFT: 14147510
+  ||line 228, col 13 to line 228, col 30 of module SmartBFT: 14147536
+  |||line 210, col 1 to line 218, col 1 of module SmartBFT: 14147547
+  ||||line 213, col 9 to line 217, col 35 of module SmartBFT: 56590216
+  |||||line 213, col 9 to line 214, col 21 of module SmartBFT: 56590225
+  ||||||line 213, col 10 to line 213, col 21 of module SmartBFT: 56587781
+  ||||||line 214, col 10 to line 214, col 20 of module SmartBFT: 56587784
+  |||||line 217, col 13 to line 217, col 35 of module SmartBFT: 56590287
+  ||||||line 217, col 13 to line 217, col 24 of module SmartBFT: 56590308
+  |||||||line 217, col 13 to line 217, col 21 of module SmartBFT: 56590320
+  |||||||line 217, col 23 to line 217, col 23 of module SmartBFT: 56590325
+  ||||line 211, col 11 to line 211, col 18 of module SmartBFT: 14147589
+  |line 230, col 1 to line 230, col 6 of module SmartBFT: 14147595
+  line 441, col 25 to line 441, col 25 of module SmartBFT: 14147604
+  line 441, col 27 to line 441, col 27 of module SmartBFT: 14147615
+  line 442, col 12 to line 444, col 36 of module SmartBFT: 4513646
+  |line 443, col 13 to line 444, col 36 of module SmartBFT: 4513653
+  ||line 443, col 14 to line 443, col 22 of module SmartBFT: 4513656
+  ||line 444, col 17 to line 444, col 35 of module SmartBFT: 4513314
+  line 445, col 12 to line 445, col 54 of module SmartBFT: 4513312
+<Deliver line 447, col 1 to line 447, col 7 of module SmartBFT (452 9 464 54)>: 2391307:3021559
+  line 452, col 12 to line 452, col 44 of module SmartBFT: 14795061
+  |line 452, col 12 to line 452, col 34 of module SmartBFT: 11773503
+  |line 452, col 38 to line 452, col 44 of module SmartBFT: 11773513
+  line 454, col 12 to line 454, col 32 of module SmartBFT: 7721246
+  |line 454, col 12 to line 454, col 12 of module SmartBFT: 4699677
+  |line 454, col 21 to line 454, col 32 of module SmartBFT: 4699680
+  line 234, col 5 to line 234, col 9 of module SmartBFT: 3035635
+  |line 234, col 5 to line 234, col 5 of module SmartBFT: 3021597
+  line 238, col 5 to line 238, col 28 of module SmartBFT: 6029153
+  |line 238, col 6 to line 238, col 10 of module SmartBFT: 3021603
+  |line 238, col 17 to line 238, col 28 of module SmartBFT: 3021608
+  line 456, col 30 to line 456, col 30 of module SmartBFT: 3021609
+  line 456, col 32 to line 456, col 32 of module SmartBFT: 3021609
+  line 458, col 12 to line 462, col 31 of module SmartBFT: 3021607
+  |line 460, col 13 to line 462, col 31 of module SmartBFT: 3021617
+  ||line 460, col 14 to line 460, col 22 of module SmartBFT: 3021620
+  ||line 461, col 17 to line 462, col 30 of module SmartBFT: 3021569
+  ||line 462, col 21 to line 462, col 30 of module SmartBFT: 3021622
+  |||line 462, col 28 to line 462, col 30 of module SmartBFT: 3021626:6294088
+  ||||line 462, col 29 to line 462, col 29 of module SmartBFT: 3021629
+  line 464, col 12 to line 464, col 54 of module SmartBFT: 3021568
+<AdvanceConsensus line 466, col 1 to line 466, col 16 of module SmartBFT>: 520:520
+  line 468, col 8 to line 468, col 38 of module SmartBFT: 520
+  |line 468, col 8 to line 468, col 23 of module SmartBFT: 3924559
+  |line 468, col 27 to line 468, col 38 of module SmartBFT: 3924563
+  line 471, col 9 to line 471, col 41 of module SmartBFT: 23480
+  |line 471, col 9 to line 471, col 24 of module SmartBFT: 21920
+  |line 471, col 30 to line 471, col 41 of module SmartBFT: 21920
+  line 470, col 17 to line 470, col 23 of module SmartBFT: 15680
+  line 473, col 8 to line 473, col 47 of module SmartBFT: 520
+  line 475, col 8 to line 475, col 43 of module SmartBFT: 520
+<Stutter line 482, col 1 to line 482, col 7 of module SmartBFT>: 0:3924582
+  line 482, col 12 to line 482, col 25 of module SmartBFT: 3924584
+<TypeOK line 111, col 1 to line 111, col 6 of module SmartBFT>
+  line 117, col 5 to line 125, col 37 of module SmartBFT: 5300384
+  |line 117, col 8 to line 120, col 30 of module SmartBFT: 5300388
+  |line 122, col 8 to line 124, col 42 of module SmartBFT: 5300389
+  ||line 122, col 8 to line 122, col 16 of module SmartBFT: 5300391
+  ||line 124, col 13 to line 124, col 42 of module SmartBFT: 5300394
+  |||line 124, col 14 to line 124, col 21 of module SmartBFT: 5300398
+  |||line 124, col 26 to line 124, col 41 of module SmartBFT: 5300402
+  ||||line 124, col 33 to line 124, col 41 of module SmartBFT: 5300409
+  |line 125, col 8 to line 125, col 37 of module SmartBFT: 5300413
+<Agreement line 516, col 1 to line 516, col 9 of module SmartBFT>
+  line 517, col 3 to line 523, col 33 of module SmartBFT: 5300424
+  |line 518, col 5 to line 523, col 33 of module SmartBFT: 10600852
+  ||line 519, col 7 to line 523, col 33 of module SmartBFT: 95407691
+  |||line 519, col 7 to line 520, col 43 of module SmartBFT: 95407708
+  ||||line 519, col 10 to line 519, col 43 of module SmartBFT: 95407765
+  |||||line 519, col 10 to line 519, col 33 of module SmartBFT: 95407809
+  ||||||line 519, col 10 to line 519, col 29 of module SmartBFT: 95407830
+  ||||||line 519, col 31 to line 519, col 32 of module SmartBFT: 95407857
+  |||||line 519, col 37 to line 519, col 43 of module SmartBFT: 95407881
+  ||||line 520, col 10 to line 520, col 43 of module SmartBFT: 70169742
+  |||||line 520, col 10 to line 520, col 33 of module SmartBFT: 70169771
+  ||||||line 520, col 10 to line 520, col 29 of module SmartBFT: 70169799
+  ||||||line 520, col 31 to line 520, col 32 of module SmartBFT: 70169826
+  |||||line 520, col 37 to line 520, col 43 of module SmartBFT: 70169854
+  |||line 521, col 10 to line 523, col 33 of module SmartBFT: 63113233
+  ||||line 521, col 10 to line 521, col 33 of module SmartBFT: 63113252
+  |||||line 521, col 10 to line 521, col 29 of module SmartBFT: 63113296
+  ||||||line 521, col 10 to line 521, col 21 of module SmartBFT: 63113334
+  |||||||line 521, col 10 to line 521, col 18 of module SmartBFT: 63113374
+  |||||||line 521, col 20 to line 521, col 20 of module SmartBFT: 63113379
+  |||||line 521, col 31 to line 521, col 32 of module SmartBFT: 63113392
+  ||||line 523, col 10 to line 523, col 33 of module SmartBFT: 63113425
+  |||||line 523, col 10 to line 523, col 29 of module SmartBFT: 63113444
+  ||||||line 523, col 10 to line 523, col 21 of module SmartBFT: 63113487
+  |||||||line 523, col 10 to line 523, col 18 of module SmartBFT: 63113510
+  |||||||line 523, col 20 to line 523, col 20 of module SmartBFT: 63113559
+  |||||line 523, col 31 to line 523, col 32 of module SmartBFT: 63113573
+  ||line 518, col 18 to line 518, col 24 of module SmartBFT: 10600954
+  |line 517, col 12 to line 517, col 20 of module SmartBFT: 5300477
+<Validity line 532, col 1 to line 532, col 8 of module SmartBFT>
+  line 533, col 3 to line 538, col 42 of module SmartBFT: 5300482
+  |line 534, col 5 to line 538, col 42 of module SmartBFT: 10600970
+  ||line 535, col 7 to line 538, col 42 of module SmartBFT: 31802916
+  |||line 535, col 7 to line 535, col 39 of module SmartBFT: 31802922
+  |||line 537, col 7 to line 538, col 42 of module SmartBFT: 23390149
+  ||||line 170, col 5 to line 174, col 33 of module SmartBFT: 23390157
+  |||||line 170, col 5 to line 171, col 17 of module SmartBFT: 23390180
+  ||||||line 170, col 6 to line 170, col 22 of module SmartBFT: 23390106
+  ||||||line 171, col 6 to line 171, col 16 of module SmartBFT: 23390107
+  |||||line 174, col 9 to line 174, col 33 of module SmartBFT: 23390204
+  ||||||line 174, col 9 to line 174, col 20 of module SmartBFT: 23390216
+  |||||||line 174, col 9 to line 174, col 17 of module SmartBFT: 23390233
+  |||||||line 174, col 19 to line 174, col 19 of module SmartBFT: 23390244
+  ||||line 537, col 19 to line 537, col 19 of module SmartBFT: 23390263
+  ||||line 538, col 19 to line 538, col 41 of module SmartBFT: 23390269
+  |||||line 538, col 19 to line 538, col 38 of module SmartBFT: 23390282
+  |||||line 538, col 40 to line 538, col 40 of module SmartBFT: 23390285
+  ||line 534, col 14 to line 534, col 20 of module SmartBFT: 10601030
+  |line 533, col 12 to line 533, col 20 of module SmartBFT: 5300517
+<Integrity line 545, col 1 to line 545, col 9 of module SmartBFT>
+  line 546, col 3 to line 551, col 43 of module SmartBFT: 5300528
+  |line 547, col 5 to line 551, col 43 of module SmartBFT: 10601057
+  ||line 548, col 7 to line 551, col 43 of module SmartBFT: 31803174
+  |||line 548, col 7 to line 548, col 39 of module SmartBFT: 31803177
+  ||||line 548, col 7 to line 548, col 29 of module SmartBFT: 31803193
+  ||||line 548, col 33 to line 548, col 39 of module SmartBFT: 31803207
+  |||line 550, col 7 to line 551, col 43 of module SmartBFT: 23390410
+  ||||line 228, col 1 to line 230, col 6 of module SmartBFT: 23390422
+  |||||line 228, col 1 to line 228, col 31 of module SmartBFT: 23390434
+  ||||||line 228, col 13 to line 228, col 30 of module SmartBFT: 23390443
+  |||||||line 210, col 1 to line 218, col 1 of module SmartBFT: 23390453
+  ||||||||line 213, col 9 to line 217, col 35 of module SmartBFT: 93561812
+  |||||||||line 213, col 9 to line 214, col 21 of module SmartBFT: 93561920
+  ||||||||||line 213, col 10 to line 213, col 21 of module SmartBFT: 93561355
+  ||||||||||line 214, col 10 to line 214, col 20 of module SmartBFT: 93561356
+  |||||||||line 217, col 13 to line 217, col 35 of module SmartBFT: 93562066
+  ||||||||||line 217, col 13 to line 217, col 24 of module SmartBFT: 93562072
+  |||||||||||line 217, col 13 to line 217, col 21 of module SmartBFT: 93562144
+  |||||||||||line 217, col 23 to line 217, col 23 of module SmartBFT: 93562144
+  ||||||||line 211, col 11 to line 211, col 18 of module SmartBFT: 23390541
+  |||||line 230, col 1 to line 230, col 6 of module SmartBFT: 23390548
+  ||||line 550, col 20 to line 550, col 20 of module SmartBFT: 23391091
+  ||||line 551, col 20 to line 551, col 42 of module SmartBFT: 23391145
+  |||||line 551, col 20 to line 551, col 39 of module SmartBFT: 23391168
+  |||||line 551, col 41 to line 551, col 41 of module SmartBFT: 23391178
+  ||line 547, col 14 to line 547, col 20 of module SmartBFT: 10601354
+  |line 546, col 12 to line 546, col 20 of module SmartBFT: 5300681
+<AcceptImpliesWrite line 558, col 1 to line 558, col 18 of module SmartBFT>
+  line 559, col 3 to line 563, col 28 of module SmartBFT: 5300689
+  |line 560, col 5 to line 563, col 28 of module SmartBFT: 10601403
+  ||line 561, col 7 to line 563, col 28 of module SmartBFT: 36315476
+  |||line 561, col 7 to line 561, col 26 of module SmartBFT: 36315503
+  ||||line 561, col 7 to line 561, col 14 of module SmartBFT: 36315536
+  ||||line 561, col 20 to line 561, col 26 of module SmartBFT: 36315539
+  |||line 563, col 7 to line 563, col 28 of module SmartBFT: 23681269
+  ||||line 222, col 1 to line 224, col 6 of module SmartBFT: 23681302
+  |||||line 222, col 1 to line 222, col 30 of module SmartBFT: 23681331
+  ||||||line 222, col 13 to line 222, col 29 of module SmartBFT: 23681352
+  |||||||line 198, col 1 to line 206, col 1 of module SmartBFT: 23681378
+  ||||||||line 201, col 9 to line 205, col 34 of module SmartBFT: 94725520
+  |||||||||line 201, col 9 to line 202, col 21 of module SmartBFT: 94725629
+  ||||||||||line 201, col 10 to line 201, col 21 of module SmartBFT: 94724565
+  ||||||||||line 202, col 10 to line 202, col 20 of module SmartBFT: 94724567
+  |||||||||line 205, col 13 to line 205, col 34 of module SmartBFT: 94725736
+  ||||||||line 199, col 11 to line 199, col 18 of module SmartBFT: 23681439
+  |||||line 224, col 1 to line 224, col 6 of module SmartBFT: 23681452
+  ||||line 563, col 19 to line 563, col 19 of module SmartBFT: 23681468
+  ||||line 563, col 21 to line 563, col 27 of module SmartBFT: 23681484
+  ||line 560, col 14 to line 560, col 36 of module SmartBFT: 10601534
+  |line 559, col 12 to line 559, col 20 of module SmartBFT: 5300769
+<OrderedDelivery line 577, col 1 to line 577, col 15 of module SmartBFT>
+  line 579, col 5 to line 582, col 43 of module SmartBFT: 5300773
+  |line 580, col 9 to line 582, col 43 of module SmartBFT: 15902322
+  ||line 581, col 13 to line 582, col 43 of module SmartBFT: 18877502
+  |||line 582, col 17 to line 582, col 43 of module SmartBFT: 37755026
+  ||||line 582, col 17 to line 582, col 21 of module SmartBFT: 37755026
+  ||||line 582, col 26 to line 582, col 43 of module SmartBFT: 3008175
+  |||line 581, col 22 to line 581, col 30 of module SmartBFT: 18877535
+  ||line 580, col 18 to line 580, col 29 of module SmartBFT: 15902355
+  |line 579, col 14 to line 579, col 20 of module SmartBFT: 5300788
+End of statistics.
+Model checking completed. No error has been found.
+  Estimates of the probability that TLC did not check all reachable states
+  because two distinct states had the same fingerprint:
+  calculated (optimistic):  val = 1.8E-5
+  based on the actual fingerprints:  val = 1.1E-5
+The coverage statistics at 2026-06-19 12:50:52
+<Init line 137, col 1 to line 137, col 4 of module SmartBFT>: 1:1
+  line 139, col 5 to line 163, col 27 of module SmartBFT: 1
+<CorrectLeaderPropose line 256, col 1 to line 256, col 20 of module SmartBFT>: 0:0
+  line 257, col 6 to line 257, col 23 of module SmartBFT: 8169280
+  line 261, col 14 to line 267, col 24 of module SmartBFT: 0
+  line 268, col 14 to line 268, col 56 of module SmartBFT: 0
+<FaultyLeaderPropose line 285, col 1 to line 285, col 19 of module SmartBFT>: 4179:3151008
+  line 286, col 6 to line 286, col 22 of module SmartBFT: 11311952
+  |line 286, col 6 to line 286, col 11 of module SmartBFT: 8169280
+  |line 286, col 17 to line 286, col 22 of module SmartBFT: 8169280
+  line 289, col 14 to line 291, col 47 of module SmartBFT: 19489568
+  |line 289, col 14 to line 290, col 28 of module SmartBFT: 16338560
+  |line 291, col 23 to line 291, col 47 of module SmartBFT: 16338560
+  line 292, col 14 to line 298, col 24 of module SmartBFT: 3151008
+  line 299, col 14 to line 299, col 56 of module SmartBFT: 3151008
+  line 288, col 19 to line 288, col 24 of module SmartBFT: 8169280
+<CorrectWrite line 320, col 1 to line 320, col 12 of module SmartBFT (324 9 333 56)>: 31232:6051936
+  line 170, col 5 to line 174, col 33 of module SmartBFT: 55067616
+  |line 170, col 5 to line 171, col 17 of module SmartBFT: 49015680
+  |line 174, col 9 to line 174, col 33 of module SmartBFT: 49015680
+  line 324, col 24 to line 324, col 24 of module SmartBFT: 49015680
+  line 324, col 26 to line 324, col 26 of module SmartBFT: 49015680
+  line 325, col 12 to line 325, col 29 of module SmartBFT: 45614592
+  |line 325, col 13 to line 325, col 29 of module SmartBFT: 39562656
+  ||line 178, col 5 to line 184, col 30 of module SmartBFT: 39562656
+  |||line 180, col 9 to line 184, col 30 of module SmartBFT: 62369952
+  |||line 178, col 14 to line 178, col 19 of module SmartBFT: 39562656
+  ||line 325, col 26 to line 325, col 26 of module SmartBFT: 39562656
+  ||line 325, col 28 to line 325, col 28 of module SmartBFT: 39562656
+  line 326, col 12 to line 332, col 22 of module SmartBFT: 6051936
+  line 333, col 14 to line 333, col 56 of module SmartBFT: 6051936
+<FaultyWrite line 347, col 1 to line 347, col 11 of module SmartBFT (351 9 361 54)>: 102483:5468416
+  line 351, col 12 to line 353, col 42 of module SmartBFT: 21806976
+  |line 351, col 12 to line 352, col 26 of module SmartBFT: 16338560
+  |line 353, col 21 to line 353, col 42 of module SmartBFT: 16338560
+  line 354, col 12 to line 360, col 22 of module SmartBFT: 5468416
+  line 361, col 12 to line 361, col 54 of module SmartBFT: 5468416
+<CorrectAccept line 379, col 1 to line 379, col 13 of module SmartBFT (383 9 392 54)>: 277110:5526768
+  line 222, col 1 to line 224, col 6 of module SmartBFT: 5526768
+  |line 222, col 1 to line 222, col 30 of module SmartBFT: 49015680
+  ||line 222, col 13 to line 222, col 29 of module SmartBFT: 49015680
+  |||line 198, col 1 to line 206, col 1 of module SmartBFT: 49015680
+  ||||line 201, col 9 to line 205, col 34 of module SmartBFT: 196062720
+  ||||line 199, col 11 to line 199, col 18 of module SmartBFT: 49015680
+  |line 224, col 1 to line 224, col 6 of module SmartBFT: 49015680
+  line 383, col 24 to line 383, col 24 of module SmartBFT: 49015680
+  line 383, col 26 to line 383, col 26 of module SmartBFT: 49015680
+  line 384, col 12 to line 384, col 30 of module SmartBFT: 29259360
+  |line 384, col 13 to line 384, col 30 of module SmartBFT: 23732592
+  ||line 188, col 5 to line 194, col 31 of module SmartBFT: 23732592
+  |||line 190, col 9 to line 194, col 31 of module SmartBFT: 38362272
+  |||line 188, col 14 to line 188, col 19 of module SmartBFT: 23732592
+  ||line 384, col 27 to line 384, col 27 of module SmartBFT: 23732592
+  ||line 384, col 29 to line 384, col 29 of module SmartBFT: 23732592
+  line 385, col 12 to line 391, col 22 of module SmartBFT: 5526768
+  line 392, col 12 to line 392, col 54 of module SmartBFT: 5526768
+<FaultyAccept line 404, col 1 to line 404, col 12 of module SmartBFT (408 9 418 54)>: 815547:6056104
+  line 408, col 12 to line 410, col 43 of module SmartBFT: 22394664
+  |line 408, col 12 to line 409, col 26 of module SmartBFT: 16338560
+  |line 410, col 21 to line 410, col 43 of module SmartBFT: 16338560
+  line 411, col 12 to line 417, col 22 of module SmartBFT: 6056104
+  line 418, col 12 to line 418, col 54 of module SmartBFT: 6056104
+<Decide line 436, col 1 to line 436, col 6 of module SmartBFT (440 9 445 54)>: 2288278:7314840
+  line 440, col 12 to line 440, col 44 of module SmartBFT: 56330520
+  |line 440, col 12 to line 440, col 34 of module SmartBFT: 49015680
+  |line 440, col 38 to line 440, col 44 of module SmartBFT: 49015680
+  line 228, col 1 to line 230, col 6 of module SmartBFT: 7314840
+  |line 228, col 1 to line 228, col 31 of module SmartBFT: 19756320
+  ||line 228, col 13 to line 228, col 30 of module SmartBFT: 19756320
+  |||line 210, col 1 to line 218, col 1 of module SmartBFT: 19756320
+  ||||line 213, col 9 to line 217, col 35 of module SmartBFT: 79025280
+  ||||line 211, col 11 to line 211, col 18 of module SmartBFT: 19756320
+  |line 230, col 1 to line 230, col 6 of module SmartBFT: 19756320
+  line 441, col 25 to line 441, col 25 of module SmartBFT: 19756320
+  line 441, col 27 to line 441, col 27 of module SmartBFT: 19756320
+  line 442, col 12 to line 444, col 36 of module SmartBFT: 7314840
+  line 445, col 12 to line 445, col 54 of module SmartBFT: 7314840
+<Deliver line 447, col 1 to line 447, col 7 of module SmartBFT (452 9 464 54)>: 4649930:7314840
+  line 452, col 12 to line 452, col 44 of module SmartBFT: 31822680
+  |line 452, col 12 to line 452, col 34 of module SmartBFT: 24507840
+  |line 452, col 38 to line 452, col 44 of module SmartBFT: 24507840
+  line 454, col 12 to line 454, col 32 of module SmartBFT: 21944520
+  |line 454, col 12 to line 454, col 12 of module SmartBFT: 14629680
+  |line 454, col 21 to line 454, col 32 of module SmartBFT: 14629680
+  line 234, col 5 to line 234, col 9 of module SmartBFT: 7328880
+  |line 234, col 5 to line 234, col 5 of module SmartBFT: 7314840
+  line 238, col 5 to line 238, col 28 of module SmartBFT: 14615640
+  |line 238, col 6 to line 238, col 10 of module SmartBFT: 7314840
+  |line 238, col 17 to line 238, col 28 of module SmartBFT: 7314840
+  line 456, col 30 to line 456, col 30 of module SmartBFT: 7314840
+  line 456, col 32 to line 456, col 32 of module SmartBFT: 7314840
+  line 458, col 12 to line 462, col 31 of module SmartBFT: 7314840
+  line 464, col 12 to line 464, col 54 of module SmartBFT: 7314840
+<AdvanceConsensus line 466, col 1 to line 466, col 16 of module SmartBFT>: 520:520
+  line 468, col 8 to line 468, col 38 of module SmartBFT: 520
+  |line 468, col 8 to line 468, col 23 of module SmartBFT: 8169280
+  |line 468, col 27 to line 468, col 38 of module SmartBFT: 8169280
+  line 471, col 9 to line 471, col 41 of module SmartBFT: 23480
+  |line 471, col 9 to line 471, col 24 of module SmartBFT: 21920
+  |line 471, col 30 to line 471, col 41 of module SmartBFT: 21920
+  line 470, col 17 to line 470, col 23 of module SmartBFT: 15680
+  line 473, col 8 to line 473, col 47 of module SmartBFT: 520
+  line 475, col 8 to line 475, col 43 of module SmartBFT: 520
+<Stutter line 482, col 1 to line 482, col 7 of module SmartBFT>: 0:8169280
+  line 482, col 12 to line 482, col 25 of module SmartBFT: 8169280
+<TypeOK line 111, col 1 to line 111, col 6 of module SmartBFT>
+  line 117, col 5 to line 125, col 37 of module SmartBFT: 8169280
+<Agreement line 516, col 1 to line 516, col 9 of module SmartBFT>
+  line 517, col 3 to line 523, col 33 of module SmartBFT: 8169280
+  |line 518, col 5 to line 523, col 33 of module SmartBFT: 16338560
+  ||line 519, col 7 to line 523, col 33 of module SmartBFT: 147047040
+  |||line 519, col 7 to line 520, col 43 of module SmartBFT: 147047040
+  ||||line 519, col 10 to line 519, col 43 of module SmartBFT: 147047040
+  ||||line 520, col 10 to line 520, col 43 of module SmartBFT: 117271440
+  |||line 521, col 10 to line 523, col 33 of module SmartBFT: 107518320
+  ||line 518, col 18 to line 518, col 24 of module SmartBFT: 16338560
+  |line 517, col 12 to line 517, col 20 of module SmartBFT: 8169280
+<Validity line 532, col 1 to line 532, col 8 of module SmartBFT>
+  line 533, col 3 to line 538, col 42 of module SmartBFT: 8169280
+  |line 534, col 5 to line 538, col 42 of module SmartBFT: 16338560
+  ||line 535, col 7 to line 538, col 42 of module SmartBFT: 49015680
+  |||line 535, col 7 to line 535, col 39 of module SmartBFT: 49015680
+  |||line 537, col 7 to line 538, col 42 of module SmartBFT: 39090480
+  ||line 534, col 14 to line 534, col 20 of module SmartBFT: 16338560
+  |line 533, col 12 to line 533, col 20 of module SmartBFT: 8169280
+<Integrity line 545, col 1 to line 545, col 9 of module SmartBFT>
+  line 546, col 3 to line 551, col 43 of module SmartBFT: 8169280
+  |line 547, col 5 to line 551, col 43 of module SmartBFT: 16338560
+  ||line 548, col 7 to line 551, col 43 of module SmartBFT: 49015680
+  |||line 548, col 7 to line 548, col 39 of module SmartBFT: 49015680
+  |||line 550, col 7 to line 551, col 43 of module SmartBFT: 39090480
+  ||||line 228, col 1 to line 230, col 6 of module SmartBFT: 39090480
+  |||||line 228, col 1 to line 228, col 31 of module SmartBFT: 39090480
+  ||||||line 228, col 13 to line 228, col 30 of module SmartBFT: 39090480
+  |||||||line 210, col 1 to line 218, col 1 of module SmartBFT: 39090480
+  ||||||||line 213, col 9 to line 217, col 35 of module SmartBFT: 156361920
+  ||||||||line 211, col 11 to line 211, col 18 of module SmartBFT: 39090480
+  |||||line 230, col 1 to line 230, col 6 of module SmartBFT: 39090480
+  ||||line 550, col 20 to line 550, col 20 of module SmartBFT: 39090480
+  ||||line 551, col 20 to line 551, col 42 of module SmartBFT: 39090480
+  ||line 547, col 14 to line 547, col 20 of module SmartBFT: 16338560
+  |line 546, col 12 to line 546, col 20 of module SmartBFT: 8169280
+<AcceptImpliesWrite line 558, col 1 to line 558, col 18 of module SmartBFT>
+  line 559, col 3 to line 563, col 28 of module SmartBFT: 8169280
+  |line 560, col 5 to line 563, col 28 of module SmartBFT: 16338560
+  ||line 561, col 7 to line 563, col 28 of module SmartBFT: 58656600
+  |||line 561, col 7 to line 561, col 26 of module SmartBFT: 58656600
+  |||line 563, col 7 to line 563, col 28 of module SmartBFT: 37774464
+  ||||line 222, col 1 to line 224, col 6 of module SmartBFT: 37774464
+  |||||line 222, col 1 to line 222, col 30 of module SmartBFT: 37774464
+  ||||||line 222, col 13 to line 222, col 29 of module SmartBFT: 37774464
+  |||||||line 198, col 1 to line 206, col 1 of module SmartBFT: 37774464
+  ||||||||line 201, col 9 to line 205, col 34 of module SmartBFT: 151097856
+  ||||||||line 199, col 11 to line 199, col 18 of module SmartBFT: 37774464
+  |||||line 224, col 1 to line 224, col 6 of module SmartBFT: 37774464
+  ||||line 563, col 19 to line 563, col 19 of module SmartBFT: 37774464
+  ||||line 563, col 21 to line 563, col 27 of module SmartBFT: 37774464
+  ||line 560, col 14 to line 560, col 36 of module SmartBFT: 16338560
+  |line 559, col 12 to line 559, col 20 of module SmartBFT: 8169280
+<OrderedDelivery line 577, col 1 to line 577, col 15 of module SmartBFT>
+  line 579, col 5 to line 582, col 43 of module SmartBFT: 8169280
+  |line 580, col 9 to line 582, col 43 of module SmartBFT: 24507840
+  ||line 581, col 13 to line 582, col 43 of module SmartBFT: 31775640
+  |||line 582, col 17 to line 582, col 43 of module SmartBFT: 63551280
+  ||||line 582, col 17 to line 582, col 21 of module SmartBFT: 63551280
+  ||||line 582, col 26 to line 582, col 43 of module SmartBFT: 7300800
+  |||line 581, col 22 to line 581, col 30 of module SmartBFT: 31775640
+  ||line 580, col 18 to line 580, col 29 of module SmartBFT: 24507840
+  |line 579, col 14 to line 579, col 20 of module SmartBFT: 8169280
+End of statistics.
+49053713 states generated, 8169280 distinct states found, 0 states left on queue.
+The depth of the complete state graph search is 38.
+The average outdegree of the complete state graph is 1 (minimum is 0, the maximum 10 and the 95th percentile is 3).
+Finished in 01min 57s at (2026-06-19 12:50:52)
