@@ -36,7 +36,7 @@ CONFIGS = \
 
 # Default TLC options. Override from command line if needed, e.g.:
 # make check-tiny TLC_BASE_OPTS="-workers 1 -coverage 1"
-TLC_BASE_OPTS ?= -workers auto #-coverage
+TLC_BASE_OPTS ?= -workers auto #-coverage 1
 
 .PHONY: help setup clean all-configs \
 	check-tiny check-no-faults check-f1-leader check-f1-nonleader \

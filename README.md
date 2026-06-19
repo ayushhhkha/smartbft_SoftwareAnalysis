@@ -1010,16 +1010,18 @@ The HTML report is mainly useful when TLC coverage is enabled. Coverage is what 
 The Makefile runs TLC with coverage disabled by default:
 
 ```bash
-TLC_BASE_OPTS ?= -workers auto #-coverage
+TLC_BASE_OPTS ?= -workers auto #-coverage 1
 ```
 
 This means that the HTML report may still be generated, but it will contain much less useful information. In that case, the raw TLC output is usually enough because the report cannot show meaningful coverage rows.
 
-To enable coverage, uncomment the `-coverage` option in the Makefile (around line 39):
+To enable coverage, uncomment the `-coverage 1` option in the Makefile (around line 39):
 
 ```bash
-TLC_BASE_OPTS ?= -workers auto -coverage
+TLC_BASE_OPTS ?= -workers auto -coverage 1
 ```
+
+This option tells TLC to print coverage information every num (1) minutes. Without the option, TLC prints no coverage information.
 
 To generate a report without a graph:
 
