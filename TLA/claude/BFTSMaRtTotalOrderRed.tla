@@ -17,12 +17,13 @@
 EXTENDS BFTSMaRtTotalOrder
 
 NextRed ==
-    \/ \E c \in Instances, v \in Values : Propose(c, v)
-    \/ \E r \in Replicas, c \in Instances, v \in Values : SendWrite(r, c, v)
-    \/ \E r \in Replicas, c \in Instances, v \in Values : SendAccept(r, c, v)
-    \/ \E r \in Replicas, c \in Instances, v \in Values : Decide(r, c, v)
-    \/ \E r \in Replicas, c \in Instances,
+    \/ \E c \in Consensus, v \in Values : Propose(c, v)
+    \/ \E r \in Replicas, c \in Consensus, v \in Values : SendWrite(r, c, v)
+    \/ \E r \in Replicas, c \in Consensus, v \in Values : SendAccept(r, c, v)
+    \/ \E r \in Replicas, c \in Consensus, v \in Values : Decide(r, c, v)
+    \/ \E r \in Replicas, c \in Consensus,
           t \in {"WRITE","ACCEPT"}, v \in Values : ByzantineSend(r, c, t, v)
+    \/ Stutter
 
 SpecRed == Init /\ [][NextRed]_vars
 
