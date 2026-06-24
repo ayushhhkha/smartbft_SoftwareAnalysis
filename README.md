@@ -1,4 +1,4 @@
-# Research in Software Analysis: SmartBFT
+# Research in Software Analysis: SmartBFT --- ChatGPT Model
 
 ## Table of Contents
 
