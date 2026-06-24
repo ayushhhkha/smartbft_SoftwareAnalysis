@@ -1,2 +1,5 @@
 .tlc-meta/
 states/
+outputs/
+graphs/
+reports/
