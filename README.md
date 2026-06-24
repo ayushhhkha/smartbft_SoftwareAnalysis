@@ -781,7 +781,7 @@ After TLC finishes, the parser script prints a smaller summary table. Please not
 Example:
 
 ```text
-TLC Summary
+TLC Coverage Summary
 ============================================================
 Input:  outputs/bft-f1-faulty-nonleader.out
 Report: reports/bft-f1-faulty-nonleader.html
