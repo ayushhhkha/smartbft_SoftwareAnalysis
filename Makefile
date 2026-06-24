@@ -18,6 +18,7 @@ OUT_DIR    = outputs/claude
 GRAPH_DIR  = graphs/claude
 META_DIR   = .tlc-meta-claude
 REPORT_DIR = reports/claude
+MODEL_OPTS =
 else ifeq ($(MODEL),smartbft)
 SPEC       = SmartBFT.tla
 CONFIG_DIR = configs
@@ -25,6 +26,7 @@ OUT_DIR    = outputs
 GRAPH_DIR  = graphs
 META_DIR   = .tlc-meta
 REPORT_DIR = reports
+MODEL_OPTS =
 else
 $(error Unknown MODEL '$(MODEL)'. Use MODEL=smartbft or MODEL=claude)
 endif
@@ -106,7 +108,7 @@ define run_tlc
 	echo "Spec:   $(SPEC)"; \
 	echo "Config: $$cfg"; \
 	echo "Output: $$out"; \
-	java -jar $(TLC) $(TLC_BASE_OPTS) -metadir $(META_DIR) -config $$cfg $(SPEC) | tee $$out; \
+	java -jar $(TLC) $(TLC_BASE_OPTS) $(MODEL_OPTS) -metadir $(META_DIR) -config $$cfg $(SPEC) | tee $$out; \
 	python3 scripts/parse_tlc_out.py $$out $$report
 endef
 
@@ -121,7 +123,7 @@ define run_graph
 	echo "Spec:   $(SPEC)"; \
 	echo "Config: $$cfg"; \
 	echo "DOT:    $$dotfile"; \
-	java -jar $(TLC) $(TLC_BASE_OPTS) -metadir $(META_DIR) -config $$cfg $(SPEC) -dump dot,actionlabels,colorize $$dotfile | tee $$out
+	java -jar $(TLC) $(TLC_BASE_OPTS) $(MODEL_OPTS) -metadir $(META_DIR) -config $$cfg $(SPEC) -dump dot,actionlabels,colorize $$dotfile | tee $$out
 endef
 
 # $(call run_svg, config-file)

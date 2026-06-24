@@ -958,30 +958,46 @@ This should never happen in a replicated state machine.
 ### Additional checks in `ClaudeSmartBFT.tla` (`MODEL=claude`)
 
 The alternative model (run with `MODEL=claude`, using `configs/claude/*.cfg`)
-checks everything above plus the following stronger properties. Most are extra
-safety invariants; `Termination` is a liveness property and is only asserted in
-the configs where it can hold (a Byzantine *leader* can stall progress, so it is
-intentionally left out of the two faulty-leader configs).
+checks everything above plus the following stronger **safety** invariants:
 
 ```text
 DecisionMatchesAccept    (safety)
 CertificateUniqueness    (safety)
 TotalOrder               (safety)
 PrefixGapFree            (safety)
-Termination              (liveness, non-faulty-leader configs only)
 ```
+
+Like the SmartBFT configs, the `configs/claude/*.cfg` files are **safety-only**
+(`INIT`/`NEXT` + invariants, with `SYMMETRY Symmetry`). They do **not** check a
+liveness property. The model *defines* a liveness property, `Termination`
+(`<>(all correct replicas decide every instance)`), and a `FairSpec` to check it
+under fairness,  but it is deliberately not asserted in these configs, for two
+reasons:
+
+1. **Cost:** Liveness checking forces TLC to build and store the full behavior
+   graph (states *and* transitions) on disk for cycle analysis, which is far
+   more expensive than on-the-fly invariant checking and explodes on the larger
+   setups.
+2. **Soundness:** `SYMMETRY` is unsound for liveness (TLC warns it may miss
+   violations of temporal properties), and the symmetry reduction is valuable
+   for the safety runs.
+
+Liveness is best checked separately, as a cheap bug-finder, in a small dedicated
+config (`MaxConsensus = 1`, small `n`, **no** `SYMMETRY`, `SPECIFICATION
+FairSpec`, `PROPERTIES Termination`). That is exactly how the
+`Propose`-guard liveness bug was found and fixed.
 
 | Property | Meaning |
 | -------- | ------- |
 | `DecisionMatchesAccept` | A correct replica decides exactly the value it itself accepted. |
 | `CertificateUniqueness` | At most one value can gather an ACCEPT quorum (certificate) per consensus instance. |
-| `TotalOrder` | Any two correct replicas' committed (contiguous decided) prefixes agree on every common slot — one log is always a prefix of the other, never a fork. |
+| `TotalOrder` | Any two correct replicas' committed (contiguous decided) prefixes agree on every common slot. One log is always a prefix of the other, never a fork. |
 | `PrefixGapFree` | A replica's committed prefix has no gaps (every slot below its length is decided). |
-| `Termination` | Every correct replica eventually decides every instance (checked under fairness, with a correct leader). |
+| `Termination` *(defined, not asserted)* | Every correct replica eventually decides every instance. Liveness checked only in a small dedicated config, never the safety suite. |
 
-These configs also enable `SYMMETRY Symmetry` (permutations of `Values`) to
-reduce the state space, and use `SPECIFICATION FairSpec` so the liveness
-property can be checked.
+These configs enable `SYMMETRY Symmetry` (permutations of `Values`) to reduce the
+state space, which is sound precisely because they check only safety (no
+temporal property).
 
 ---
 
