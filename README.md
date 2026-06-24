@@ -776,7 +776,7 @@ This means TLC did not find an invariant violation for the selected configuratio
 
 ### 2. Custom Summary Table
 
-After TLC finishes, the parser script prints a smaller summary table.
+After TLC finishes, the parser script prints a smaller summary table. Please note that this is only enabled with the coverage option. More of this can be found in section [HTML Reports](#html-reports).
 
 Example:
 
@@ -786,15 +786,9 @@ TLC Summary
 Input:  outputs/bft-f1-faulty-nonleader.out
 Report: reports/bft-f1-faulty-nonleader.html
 
-State Summary
-------------------------------------------------------------
-distinct_states      2232
-total_states         11481
-queue_size           0
-
 Top Coverage Rows
 ------------------------------------------------------------
-Location                              Distinct      Total
+Action                              Total      Distinct
 ------------------------------------------------------------
 Init                                         1          1
 CorrectLeaderPropose                        2         32
@@ -831,12 +825,11 @@ then TLC explored the finite state space for that config and found no violation 
 
 ### Important State Summary Numbers
 
-| Metric | Meaning |
-| ------ | ------- |
-| `total_states` | Total states TLC generated, including duplicates |
-| `distinct_states` | Unique reachable states |
-| `queue_size` | States still waiting to be explored |
+These can be found in the .out file or printed in the terminal. Example:
 
+```text
+156280865 states generated, 9331232 distinct states found, 0 states left on queue.
+```
 If:
 
 ```text
@@ -849,7 +842,7 @@ then TLC finished exploring the full reachable state space for that configuratio
 
 | Column | Meaning |
 | ------ | ------- |
-| `Location` | TLA+ action or expression being measured |
+| `Action` | TLA+ action or expression being measured |
 | `Distinct` | Number of new distinct states produced |
 | `Total` | Number of times TLC evaluated/generated states for that action |
 
