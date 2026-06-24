@@ -19,33 +19,44 @@
 
 ## Project Overview
 
-This project models a simplified version of the SmartBFT/BFT-SMaRt normal consensus phase in TLA+.
+This project contains a TLA+ model of the BFT-SMaRt normal-case consensus protocol developed using Claude Code (Opus 4.8) as part of a study on LLM-assisted formal modeling of distributed systems.
 
-The final model represents **multiple consensus instances**, not only one isolated consensus round. Each consensus instance follows the normal-phase structure:
+The model represents multiple consensus instances rather than a single isolated consensus round. Each consensus instance follows the normal BFT-SMaRt message flow:
 
 ```text
 PROPOSE -> WRITE -> ACCEPT -> DECIDE -> DELIVER
 ```
 
-The model therefore checks a simplified state machine replication flow:
+The model therefore captures a simplified state machine replication workflow:
 
 ```text
 Consensus 1
     -> deliver decided value/batch
 Consensus 2
     -> deliver decided value/batch
-...
 ```
 
-This is closer to the way BFT-SMaRt repeatedly orders batches of client requests. The model still abstracts away many implementation details, but it now includes the idea that consensus instances are executed and delivered in order.
+This reflects the way BFT-SMaRt repeatedly orders batches of client requests through a sequence of consensus instances. While the model abstracts many implementation details, it captures the core consensus protocol and ordered delivery behavior described in the original BFT-SMaRt design.
 
-The main safety goals are:
+The primary safety goals are:
 
 ```text
 No two correct replicas decide different values for the same consensus instance.
-Correct replicas only deliver consensus instances in order.
-Correct replicas only accept/decide values after the required quorum conditions.
+Correct replicas can only deliver consensus instances in order, as determined by their contiguous decided prefix.
+Correct replicas only accept and decide values after the required quorum conditions are satisfied.
 ```
+
+---
+
+## Model Origin
+
+This repository contains the Claude-generated version of the BFT-SMaRt model evaluated in the accompanying research report.
+
+The specification was initially generated using Claude Code (Opus 4.8) and refined through an iterative process involving protocol analysis, TLC model checking, invariant verification, and prompt-driven revisions.
+
+The model was developed using the original BFT-SMaRt paper and implementation as reference material to improve protocol fidelity and ensure that the resulting specification closely reflects the normal-case protocol behavior described by the system designers.
+
+The repository provides the complete model, TLC configurations, generated artifacts, and instructions required to reproduce the verification results discussed in the report.
 
 ---
 
@@ -53,17 +64,15 @@ Correct replicas only accept/decide values after the required quorum conditions.
 
 ```text
 .
-├── SmartBFT.tla                 # Main TLA+ model
-├── ClaudeSmartBFT.tla           # Alternative multi-instance model (MODEL=claude)
-├── configs/                     # TLC configuration files (SmartBFT.tla)
+├── SmartBFT.tla                 # Main TLA+ model (Claude)
+├── configs/                     # TLC configuration files (Claude Model Specific)
 │   ├── debug-2replicas-f0.cfg
 │   ├── bft-f1-no-faults.cfg
 │   ├── bft-f1-faulty-leader.cfg
 │   ├── bft-f1-faulty-nonleader.cfg
 │   ├── bft-f2-faulty-leader.cfg
 │   ├── bft-f2-faulty-nonleaders.cfg
-│   ├── bft-f2-extra-replicas-faulty-nonleaders.cfg
-│   └── claude/                  # Same setups for ClaudeSmartBFT.tla (full featureset)
+│   └── bft-f2-extra-replicas-faulty-nonleaders.cfg
 ├── scripts/
 │   └── parse_tlc_out.py         # Parses TLC output and generates HTML reports
 ├── outputs/                     # Generated .out files from TLC
@@ -81,7 +90,7 @@ SmartBFT.tla
 configs/*.cfg
 ```
 
-`SmartBFT.tla` contains the actual model. The `.cfg` files define concrete TLC scenarios, such as the number of replicas, faulty replicas, leader, values, number of consensus instances, and invariants.
+`SmartBFT.tla` contains the actual claude model. The `.cfg` files define concrete TLC scenarios, such as the number of replicas, faulty replicas, leader, values, number of consensus instances, and invariants.
 
 ---
 
@@ -144,28 +153,6 @@ The Makefile workflow is recommended because it supports multiple named configur
 The recommended way to run the project is through the Makefile.
 
 You no longer need to manually pass a `.cfg` file for the normal runs. Instead, the Makefile contains predefined targets for each configuration.
-
-### Choosing the Model (`MODEL` switch)
-
-Every target accepts a `MODEL` variable that selects which model and config set to use:
-
-| `MODEL` | Spec | Configs | Output / meta dirs |
-| ------- | ---- | ------- | ------------------ |
-| `smartbft` (default) | `SmartBFT.tla` | `configs/` | `outputs/`, `reports/`, `.tlc-meta/` |
-| `claude` | `ClaudeSmartBFT.tla` | `configs/claude/` | `outputs/claude/`, `reports/claude/`, `.tlc-meta-claude/` |
-
-```bash
-make check-no-faults              # SmartBFT.tla (default)
-make check-no-faults MODEL=claude # ClaudeSmartBFT.tla, same setup
-make all-configs    MODEL=claude  # whole suite on the alternative model
-```
-
-`ClaudeSmartBFT.tla` is a multi-instance variant that runs all consensus
-instances concurrently (rather than one at a time) and checks a larger set of
-properties. See [What the Model Checks](#what-the-model-checks). Its
-`configs/claude/*.cfg` files keep the same constants as their `configs/`
-counterparts, so results are comparable. Because the two models write
-to separate output and metadata directories, their runs never overwrite each other.
 
 ### Show Available Make Commands
 
@@ -347,6 +334,8 @@ CONSTANTS
     Leader = 1
     NoValue = NoValue
 
+SYMMETRY Symmetry
+
 INVARIANTS
     TypeOK
     Agreement
@@ -354,6 +343,10 @@ INVARIANTS
     Integrity
     AcceptImpliesWrite
     OrderedDelivery
+    DecisionMatchesAccept
+    CertificateUniqueness
+    TotalOrder
+    PrefixGapFree
 ```
 
 ### Important Config Fields
@@ -388,11 +381,12 @@ Typical setup:
 
 ```text
 Replicas = {1,2}
-Values = {v1}
+Values = {v1,v2}
 MaxConsensus = 2
 F = 0
 Faulty = {}
 Leader = 1
+NoValue = NoValue
 ```
 
 Use this config to:
@@ -436,6 +430,7 @@ MaxConsensus = 2
 F = 1
 Faulty = {}
 Leader = 1
+NoValue = NoValue
 ```
 
 This checks normal fault-free behavior using a four-replica setup.
@@ -443,9 +438,11 @@ This checks normal fault-free behavior using a four-replica setup.
 Expected behavior:
 
 ```text
-FaultyWrite should not be explored.
-FaultyAccept should not be explored.
-FaultyLeaderPropose should not be explored.
+ByzantineSend should not be explored.
+Propose should be explored.
+SendWrite should be explored.
+SendAccept should be explored.
+Decide should be explored.
 No invariant violations should be found.
 ```
 
@@ -474,6 +471,7 @@ MaxConsensus = 2
 F = 1
 Faulty = {1}
 Leader = 1
+NoValue = NoValue
 ```
 
 This tests whether the model remains safe when the leader can propose conflicting values.
@@ -512,6 +510,7 @@ MaxConsensus = 2
 F = 1
 Faulty = {4}
 Leader = 1
+NoValue = NoValue
 ```
 
 This models the case where replica `4` may behave Byzantine, while the leader is correct.
@@ -519,8 +518,7 @@ This models the case where replica `4` may behave Byzantine, while the leader is
 Expected behavior:
 
 ```text
-FaultyWrite and FaultyAccept should be explored.
-FaultyLeaderPropose should not be explored.
+ByzantineSend should be explored.
 No invariant violations should be found.
 ```
 
@@ -549,6 +547,7 @@ MaxConsensus = 2
 F = 2
 Faulty = {1,2}
 Leader = 1
+NoValue = NoValue
 ```
 
 This checks a larger BFT setup where the leader is Byzantine.
@@ -585,6 +584,7 @@ MaxConsensus = 2
 F = 2
 Faulty = {4,5}
 Leader = 1
+NoValue = NoValue
 ```
 
 This is one of the main larger verification configurations.
@@ -800,7 +800,7 @@ This means TLC did not find an invariant violation for the selected configuratio
 
 ### 2. Custom Summary Table
 
-After TLC finishes, the parser script prints a smaller summary table.
+After TLC finishes, the parser script prints a smaller summary table. Please note that this is only enabled with the coverage option. More of this can be found in section [HTML Reports](#html-reports).
 
 Example:
 
@@ -810,15 +810,9 @@ TLC Summary
 Input:  outputs/bft-f1-faulty-nonleader.out
 Report: reports/bft-f1-faulty-nonleader.html
 
-State Summary
-------------------------------------------------------------
-distinct_states      2232
-total_states         11481
-queue_size           0
-
 Top Coverage Rows
 ------------------------------------------------------------
-Location                              Distinct      Total
+Action                              Total      Distinct
 ------------------------------------------------------------
 Init                                         1          1
 CorrectLeaderPropose                        2         32
@@ -855,11 +849,11 @@ then TLC explored the finite state space for that config and found no violation 
 
 ### Important State Summary Numbers
 
-| Metric | Meaning |
-| ------ | ------- |
-| `total_states` | Total states TLC generated, including duplicates |
-| `distinct_states` | Unique reachable states |
-| `queue_size` | States still waiting to be explored |
+These can be found in the .out file or printed in the terminal. Example:
+
+```text
+156280865 states generated, 9331232 distinct states found, 0 states left on queue.
+```
 
 If:
 
@@ -869,30 +863,11 @@ queue_size = 0
 
 then TLC finished exploring the full reachable state space for that configuration.
 
-### Important Coverage Numbers
-
-| Column | Meaning |
-| ------ | ------- |
-| `Location` | TLA+ action or expression being measured |
-| `Distinct` | Number of new distinct states produced |
-| `Total` | Number of times TLC evaluated/generated states for that action |
-
-For example:
-
-```text
-CorrectWrite     Distinct: 14     Total: 1560
-```
-
-means TLC considered many possible `CorrectWrite` steps, but only 14 produced new unique states.
-
-This is normal because many different paths may lead to states TLC has already seen.
-
 ---
 
 ## What the Model Checks
 
-Both models check the following invariants (and the shared `configs/*.cfg`
-reference exactly these, so they resolve identically on either spec):
+The model checks the following invariants:
 
 ```text
 TypeOK
@@ -901,6 +876,10 @@ Validity
 Integrity
 AcceptImpliesWrite
 OrderedDelivery
+DecisionMatchesAccept
+CertificateUniqueness
+TotalOrder
+PrefixGapFree
 ```
 
 ### TypeOK
@@ -955,16 +934,16 @@ Replica 1 delivers consensus 2 before consensus 1.
 
 This should never happen in a replicated state machine.
 
-### Additional checks in `ClaudeSmartBFT.tla` (`MODEL=claude`)
+### Additional Safety Properties
 
-The alternative model (run with `MODEL=claude`, using `configs/claude/*.cfg`)
-checks everything above plus the following stronger **safety** invariants:
+The alternative model checks everything above plus the following stronger **safety** invariants.
 
 ```text
 DecisionMatchesAccept    (safety)
 CertificateUniqueness    (safety)
 TotalOrder               (safety)
 PrefixGapFree            (safety)
+Termination              (liveness, non-faulty-leader configs only)
 ```
 
 Like the SmartBFT configs, the `configs/claude/*.cfg` files are **safety-only**
@@ -999,7 +978,6 @@ These configs enable `SYMMETRY Symmetry` (permutations of `Values`) to reduce th
 state space, which is sound precisely because they check only safety (no
 temporal property).
 
----
 
 ## How to Interpret the Verification Result
 
@@ -1121,15 +1099,11 @@ https://explain.tlapl.us/module-coverage-statistics
 Coverage is useful for checking whether actions such as the following were actually reached:
 
 ```text
-CorrectLeaderPropose
-FaultyLeaderPropose
-CorrectWrite
-FaultyWrite
-CorrectAccept
-FaultyAccept
+Propose
+SendWrite
+SendAccept
 Decide
-Deliver
-AdvanceConsensus
+ByzantineSend
 Stutter
 ```
 
@@ -1138,17 +1112,16 @@ If an action has zero coverage, it usually means the action was not enabled unde
 Example:
 
 ```text
-FaultyLeaderPropose = 0
+ByzantineSend = 0
 ```
 
 This is expected if:
 
 ```text
-Leader = 1
-Faulty = {4}
+Faulty = {}
 ```
 
-because the leader is not faulty in that configuration.
+because there are no Byzantine replicas in that configuration.
 
 ---
 
