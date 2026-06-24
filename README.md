@@ -805,25 +805,22 @@ After TLC finishes, the parser script prints a smaller summary table. Please not
 Example:
 
 ```text
-TLC Summary
+TLC Coverage Summary
 ============================================================
-Input:  outputs/bft-f1-faulty-nonleader.out
-Report: reports/bft-f1-faulty-nonleader.html
+Input:  outputs/debug-2replicas-f0.out
+Report: reports/debug-2replicas-f0.html
 
 Top Coverage Rows
 ------------------------------------------------------------
-Action                              Total      Distinct
+Action                                   Total   Distinct
 ------------------------------------------------------------
 Init                                         1          1
-CorrectLeaderPropose                        2         32
-CorrectWrite                               14       1560
-FaultyWrite                                51       1644
-CorrectAccept                             140       1800
-FaultyAccept                              624       1812
-Decide                                   1400       2400
-Deliver                                   900       1200
-AdvanceConsensus                            2          2
-Stutter                                     0       2232
+Propose                                     44          6
+SendWrite                                  168         41
+SendAccept                                 168         83
+Decide                                     168         90
+ByzantineSend                                0          0
+Stutter                                    221          0
 ============================================================
 ```
 
