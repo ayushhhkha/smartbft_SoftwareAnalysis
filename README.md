@@ -54,14 +54,16 @@ Correct replicas only accept/decide values after the required quorum conditions.
 ```text
 .
 ├── SmartBFT.tla                 # Main TLA+ model
-├── configs/                     # TLC configuration files
+├── ClaudeSmartBFT.tla           # Alternative multi-instance model (MODEL=claude)
+├── configs/                     # TLC configuration files (SmartBFT.tla)
 │   ├── debug-2replicas-f0.cfg
 │   ├── bft-f1-no-faults.cfg
 │   ├── bft-f1-faulty-leader.cfg
 │   ├── bft-f1-faulty-nonleader.cfg
 │   ├── bft-f2-faulty-leader.cfg
 │   ├── bft-f2-faulty-nonleaders.cfg
-│   └── bft-f2-extra-replicas-faulty-nonleaders.cfg
+│   ├── bft-f2-extra-replicas-faulty-nonleaders.cfg
+│   └── claude/                  # Same setups for ClaudeSmartBFT.tla (full featureset)
 ├── scripts/
 │   └── parse_tlc_out.py         # Parses TLC output and generates HTML reports
 ├── outputs/                     # Generated .out files from TLC
@@ -142,6 +144,28 @@ The Makefile workflow is recommended because it supports multiple named configur
 The recommended way to run the project is through the Makefile.
 
 You no longer need to manually pass a `.cfg` file for the normal runs. Instead, the Makefile contains predefined targets for each configuration.
+
+### Choosing the Model (`MODEL` switch)
+
+Every target accepts a `MODEL` variable that selects which model and config set to use:
+
+| `MODEL` | Spec | Configs | Output / meta dirs |
+| ------- | ---- | ------- | ------------------ |
+| `smartbft` (default) | `SmartBFT.tla` | `configs/` | `outputs/`, `reports/`, `.tlc-meta/` |
+| `claude` | `ClaudeSmartBFT.tla` | `configs/claude/` | `outputs/claude/`, `reports/claude/`, `.tlc-meta-claude/` |
+
+```bash
+make check-no-faults              # SmartBFT.tla (default)
+make check-no-faults MODEL=claude # ClaudeSmartBFT.tla, same setup
+make all-configs    MODEL=claude  # whole suite on the alternative model
+```
+
+`ClaudeSmartBFT.tla` is a multi-instance variant that runs all consensus
+instances concurrently (rather than one at a time) and checks a larger set of
+properties. See [What the Model Checks](#what-the-model-checks). Its
+`configs/claude/*.cfg` files keep the same constants as their `configs/`
+counterparts, so results are comparable. Because the two models write
+to separate output and metadata directories, their runs never overwrite each other.
 
 ### Show Available Make Commands
 
@@ -867,7 +891,8 @@ This is normal because many different paths may lead to states TLC has already s
 
 ## What the Model Checks
 
-The model checks the following invariants:
+Both models check the following invariants (and the shared `configs/*.cfg`
+reference exactly these, so they resolve identically on either spec):
 
 ```text
 TypeOK
@@ -929,6 +954,34 @@ Replica 1 delivers consensus 2 before consensus 1.
 ```
 
 This should never happen in a replicated state machine.
+
+### Additional checks in `ClaudeSmartBFT.tla` (`MODEL=claude`)
+
+The alternative model (run with `MODEL=claude`, using `configs/claude/*.cfg`)
+checks everything above plus the following stronger properties. Most are extra
+safety invariants; `Termination` is a liveness property and is only asserted in
+the configs where it can hold (a Byzantine *leader* can stall progress, so it is
+intentionally left out of the two faulty-leader configs).
+
+```text
+DecisionMatchesAccept    (safety)
+CertificateUniqueness    (safety)
+TotalOrder               (safety)
+PrefixGapFree            (safety)
+Termination              (liveness, non-faulty-leader configs only)
+```
+
+| Property | Meaning |
+| -------- | ------- |
+| `DecisionMatchesAccept` | A correct replica decides exactly the value it itself accepted. |
+| `CertificateUniqueness` | At most one value can gather an ACCEPT quorum (certificate) per consensus instance. |
+| `TotalOrder` | Any two correct replicas' committed (contiguous decided) prefixes agree on every common slot — one log is always a prefix of the other, never a fork. |
+| `PrefixGapFree` | A replica's committed prefix has no gaps (every slot below its length is decided). |
+| `Termination` | Every correct replica eventually decides every instance (checked under fairness, with a correct leader). |
+
+These configs also enable `SYMMETRY Symmetry` (permutations of `Values`) to
+reduce the state space, and use `SPECIFICATION FairSpec` so the liveness
+property can be checked.
 
 ---
 

@@ -2,19 +2,34 @@
 # SmartBFT TLA+ Makefile
 # ==============================
 
-# Main TLA+ spec file
-SPEC = SmartBFT.tla
-
 # TLC jar location
 TLC = tla2tools.jar
 
-# Folders
+# Model selector.
+#   MODEL=smartbft (default)
+#   MODEL=claude
+
+MODEL ?= smartbft
+
+ifeq ($(MODEL),claude)
+SPEC       = ClaudeSmartBFT.tla
+CONFIG_DIR = configs/claude
+OUT_DIR    = outputs/claude
+GRAPH_DIR  = graphs/claude
+META_DIR   = .tlc-meta-claude
+REPORT_DIR = reports/claude
+else ifeq ($(MODEL),smartbft)
+SPEC       = SmartBFT.tla
 CONFIG_DIR = configs
-OUT_DIR = outputs
-GRAPH_DIR = graphs
-META_DIR = .tlc-meta
-STATES_DIR = states
+OUT_DIR    = outputs
+GRAPH_DIR  = graphs
+META_DIR   = .tlc-meta
 REPORT_DIR = reports
+else
+$(error Unknown MODEL '$(MODEL)'. Use MODEL=smartbft or MODEL=claude)
+endif
+
+STATES_DIR = states
 
 # Predefined configs
 CFG_TINY             = $(CONFIG_DIR)/debug-2replicas-f0.cfg
@@ -50,6 +65,11 @@ TLC_BASE_OPTS ?= -workers auto #-coverage 1
 
 help:
 	@echo "SmartBFT TLA+ Makefile"
+	@echo ""
+	@echo "Model selector (applies to every target):"
+	@echo "  MODEL=smartbft  (default) SmartBFT.tla   + configs/"
+	@echo "  MODEL=claude              ClaudeSmartBFT.tla + configs/claude/"
+	@echo "  e.g.  make check-no-faults MODEL=claude"
 	@echo ""
 	@echo "Run TLC without manually passing CFG:"
 	@echo "  make check-tiny"

@@ -1,2 +1,6 @@
 .tlc-meta/
+.tlc-meta-claude/
 states/
+TLA/
+outputs/
+reports/
